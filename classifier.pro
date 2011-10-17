@@ -17,11 +17,19 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     ClassifierInterface.cpp \
-    FeatureImporter.cpp
+    FeatureImporter.cpp \
+    CpuClassifier.cpp \
+    SortItem.cpp
 
 HEADERS += \
     ClassifierInterface.h \
-    FeatureImporter.h
+    FeatureImporter.h \
+    CpuClassifier.h \
+    SortItem.h
+
+
+
+
 
 
 

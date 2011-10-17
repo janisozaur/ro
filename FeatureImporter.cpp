@@ -18,6 +18,7 @@ FeatureImporter::FeatureImporter(QIODevice *data)
 		for (unsigned int j = 0; j < mFeatureCount; j++) {
 			stream >> mData[i * mFeatureCount + j];
 		}
+		mLabels << label;
 	}
 }
 
