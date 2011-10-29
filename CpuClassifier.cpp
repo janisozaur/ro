@@ -65,7 +65,7 @@ QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
     for (int i = 0; i < k.size(); i++) {
         QVector<int> resTemp;
         resTemp.reserve(testItemCount);
-        for (int w = 0; w < testItemCount; w++) {
+        for (quint32 w = 0; w < testItemCount; w++) {
             QHash<int, int> h;
             for (int j = 0; j < k.at(i); j++) {
                 h[resultArr[w].at(j).mClass] += 1;
