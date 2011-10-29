@@ -69,8 +69,6 @@ int main(int argc, char *argv[])
 	int msecs = timer.elapsed();
 	qDebug() << "calculations took" << msecs << "msecs";
     for (int w = 0; w < classes.size(); w++) {
-        qDebug() << QString(80, '#');
-        qDebug() << "k: " << k.at(w);
         int correct = 0;
         QVector<QVector<qreal> > confusionMatrix;
         confusionMatrix.resize(hash.size());
@@ -122,7 +120,8 @@ int main(int argc, char *argv[])
             }
         }
 #endif
-        QTextStream stream(stdout);;
+        QTextStream stream(stdout);
+        stream << "k: " << k.at(w);
         stream << "\t&\t" << l.join("\t&\t") << "\\\\" << endl;
         for (int i = 0; i < confusionMatrix.size(); i++) {
             QStringList list;
