@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QElapsedTimer>
 
+#define PERCENTAGE_CONFUSION
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
         qDebug() << QString(80, '#');
         qDebug() << "k: " << k.at(w);
         int correct = 0;
-        QVector<QVector<quint32> > confusionMatrix;
+        QVector<QVector<qreal> > confusionMatrix;
         confusionMatrix.resize(hash.size());
         for (int i = 0; i < confusionMatrix.size(); i++) {
             confusionMatrix[i].resize(hash.size());
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < hash.size(); i++) {
             l << sorter.at(i).first;
         }
-        QVector<QVector<quint32> > tempConfusionMatrix;
+        QVector<QVector<qreal> > tempConfusionMatrix;
         tempConfusionMatrix.resize(hash.size());
         for (int j = 0; j < confusionMatrix.size(); j++) {
             for (int i = 0; i < sorter.size(); i++) {
@@ -109,6 +111,17 @@ int main(int argc, char *argv[])
             tempConfusionMatrix[j] = confusionMatrix.at(sorter.at(j).second);
         }
         confusionMatrix = tempConfusionMatrix;
+#ifdef PERCENTAGE_CONFUSION
+        for (int i = 0; i < confusionMatrix.size(); i++) {
+            qreal sum = 0;
+            for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
+                sum += confusionMatrix.at(i).at(j);
+            }
+            for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
+                confusionMatrix[i][j] = confusionMatrix.at(i).at(j) / sum * 100.0;
+            }
+        }
+#endif
         qDebug() << "\t" << l.join("\t");
         qDebug() << QString(l.join("\t").size(), '-');
         for (int i = 0; i < confusionMatrix.size(); i++) {
