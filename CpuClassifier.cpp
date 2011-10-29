@@ -25,36 +25,45 @@ QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
 									 const quint32 testItemCount,
 									 const QList<int> k)
 {
-	float *dist = new float[testItemCount * trainItemCount];
-	for (quint32 i = 0; i < testItemCount * trainItemCount; i++) {
-		dist[i] = 0;
-	}
+    int chunks = 1;
+    float *dist = new float[(testItemCount / chunks) * trainItemCount];
     QVector<SortItem> *resultArr = new QVector<SortItem>[testItemCount];
-
-#pragma omp parallel for
     for (quint32 i = 0; i < testItemCount; i++) {
-		QVector<SortItem> sortVec;
-		sortVec.reserve(trainItemCount);
-        //qDebug() << "testItem start" << i;
-		sortVec.resize(0);
-		for (quint32 j = 0; j < trainItemCount; j++) {
-			SortItem si;
-			for (quint32 k = 0; k < featuresPerItem; k++) {
-				dist[i * trainItemCount + j] += pow(fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]), 3.0f);
-			}
-			dist[i * trainItemCount + j] = pow(dist[i * trainItemCount + j], 1.0f / 3.0f);
-			si.mDistance = dist[i * trainItemCount + j];
-			si.mClass = trainClasses[j];
-			sortVec.append(si);
-		}
-		qSort(sortVec);
-		int count = sortVec.size() - k.at(0);
-		sortVec.remove(k.at(0), count);
+        resultArr[i].reserve(k.at(0));
+    }
 
-        resultArr[i] = sortVec;
+    for (int c = 0; c < chunks; c++) {
+        qDebug() << "chunk" << c;
+        for (quint32 i = 0; i < (testItemCount / chunks) * trainItemCount; i++) {
+            dist[i] = 0;
+        }
+#pragma omp parallel for
+        for (quint32 i = (testItemCount / chunks) * c; i < (testItemCount / chunks) * (c + 1); i++) {
+            QVector<SortItem> sortVec;
+            sortVec.reserve(trainItemCount);
+            //qDebug() << "testItem start" << i;
+            for (quint32 j = 0; j < trainItemCount; j++) {
+                SortItem si;
+                for (quint32 k = 0; k < featuresPerItem; k++) {
+                    float temp = fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]);
+                    temp = temp * temp * temp;
+                    //dist[i * trainItemCount + j] += pow(fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]), 3.0f);
+                    dist[(i - (testItemCount / chunks) * c) * trainItemCount + j] += temp;
+                }
+                dist[(i - (testItemCount / chunks) * c) * trainItemCount + j] = pow(dist[(i - (testItemCount / chunks) * c) * trainItemCount + j], 1.0f / 3.0f);
+                si.mDistance = dist[(i - (testItemCount / chunks) * c) * trainItemCount + j];
+                si.mClass = trainClasses[j];
+                sortVec.append(si);
+            }
+            qSort(sortVec);
+            int count = sortVec.size() - k.at(0);
+            sortVec.remove(k.at(0), count);
 
-        //qDebug() << "testItem stop" << i;
-	}
+            resultArr[i] = sortVec;
+            //qDebug() << "testItem stop" << i;
+        }
+    }
+    delete [] dist;
 
     QVector<QVector<int> > result;
     result.resize(k.size());
@@ -81,7 +90,6 @@ QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
         result[i] = resTemp;
     }
 
-    delete [] dist;
     delete [] resultArr;
     return result;
 }
