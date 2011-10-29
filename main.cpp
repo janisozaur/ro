@@ -54,13 +54,13 @@ int main(int argc, char *argv[])
 
     ClassifierInterface *ci = new CpuClassifier();
     QVector<QVector<int> > classes;
-	QElapsedTimer timer;
-	timer.start();
     qDebug() << "starting classification";
     QList<int> k;
     for (int i = 50; i >= 1; i--) {
         k.append(i);
     }
+    QElapsedTimer timer;
+    timer.start();
 	classes = ci->classify(trainFeatures.features(), testFeatures.features(),
 						   trainClasses.constData(), NULL,
 						   testFeatures.featuresPerItem(),
