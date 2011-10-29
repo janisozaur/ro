@@ -6,6 +6,7 @@
 #include <vector>
 #include <QPair>
 #include <QHash>
+#include <omp.h>
 
 #include <QDebug>
 
@@ -28,10 +29,13 @@ QVector<int> CpuClassifier::classify(const float *trainFeatures,
 	for (quint32 i = 0; i < testItemCount * trainItemCount; i++) {
 		dist[i] = 0;
 	}
-	QVector<int> result;
-	QVector<SortItem> sortVec;
-	sortVec.reserve(trainItemCount);
-	for (quint32 i = 0; i < testItemCount; i++) {
+	int *resultArr = new int[testItemCount];
+
+#pragma omp parallel for
+    for (quint32 i = 0; i < testItemCount; i++) {
+		QVector<SortItem> sortVec;
+		sortVec.reserve(trainItemCount);
+        //qDebug() << "testItem start" << i;
 		sortVec.resize(0);
 		for (quint32 j = 0; j < trainItemCount; j++) {
 			SortItem si;
@@ -55,9 +59,16 @@ QVector<int> CpuClassifier::classify(const float *trainFeatures,
 		for (QHash<int, int>::const_iterator it = h.begin(); it != h.end(); it++) {
 			pairVec.append(qMakePair(it.value(), it.key()));
 		}
-		qSort(pairVec);
-		result << pairVec.at(0).second;
+        qSort(pairVec);
+		resultArr[i] = pairVec.at(0).second;
+        //qDebug() << "testItem stop" << i;
 	}
 	delete [] dist;
+	QVector<int> result;
+	result.reserve(testItemCount);
+	for (quint32 i = 0; i < testItemCount; i++) {
+		result.append(resultArr[i]);
+	}
+	delete [] resultArr;
 	return result;
 }

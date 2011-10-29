@@ -14,6 +14,10 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -fopenmp
+QMAKE_CXXFLAGS += -mtune=core2 -march=core2 -O2
+
+LIBS += -lgomp
 
 SOURCES += main.cpp \
     ClassifierInterface.cpp \
