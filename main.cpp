@@ -51,30 +51,77 @@ int main(int argc, char *argv[])
 	}
 
     ClassifierInterface *ci = new CpuClassifier();
-	QVector<int> classes;
+    QVector<QVector<int> > classes;
 	QElapsedTimer timer;
 	timer.start();
     qDebug() << "starting classification";
+    QList<int> k;
+    for (int i = 50; i >= 1; i--) {
+        k.append(i);
+    }
 	classes = ci->classify(trainFeatures.features(), testFeatures.features(),
 						   trainClasses.constData(), NULL,
 						   testFeatures.featuresPerItem(),
 						   trainFeatures.itemCount(), testFeatures.itemCount(),
-						   QList<int>() << 10);
+                           k);
 	int msecs = timer.elapsed();
 	qDebug() << "calculations took" << msecs << "msecs";
-	int correct = 0;
-    QStringList classesStrings;
-	for (int i = 0; i < classes.size(); i++) {
-		/*qDebug() << i;
-		qDebug() << classes.at(i);
-		qDebug() << hash.at(classes.at(i));
-		qDebug() << testFeatures.labels().at(i);*/
-        classesStrings << hash.at(classes.at(i));
-		if (hash.at(classes.at(i)) == testFeatures.labels().at(i)) {
-			correct++;
-		}
-	}
-    qDebug() << "classes:" << classesStrings.join(" ");
-	qDebug() << "correct: " << ((float)correct / (float)classes.size()) * 100 << "%";
+    for (int w = 0; w < classes.size(); w++) {
+        qDebug() << QString(80, '#');
+        qDebug() << "k: " << k.at(w);
+        int correct = 0;
+        QVector<QVector<quint32> > confusionMatrix;
+        confusionMatrix.resize(hash.size());
+        for (int i = 0; i < confusionMatrix.size(); i++) {
+            confusionMatrix[i].resize(hash.size());
+        }
+        for (int i = 0; i < classes.at(w).size(); i++) {
+            /*qDebug() << i;
+            qDebug() << classes.at(i);
+            qDebug() << hash.at(classes.at(i));
+            qDebug() << testFeatures.labels().at(i);*/
+            confusionMatrix[hash.indexOf(testFeatures.labels().at(i))][classes.at(w).at(i)]++;
+            /*if (hash.at(classes.at(w).at(i)) == QString("5")) {
+                qDebug() << "is 5, should be " << testFeatures.labels().at(i);
+            }*/
+            if (hash.at(classes.at(w).at(i)) == testFeatures.labels().at(i)) {
+                correct++;
+            }
+        }
+        QVector<QPair<QString, int> > sorter;
+        for (int i = 0; i < hash.size(); i++) {
+            sorter << qMakePair(hash.at(i), i);
+        }
+        qSort(sorter);
+        QStringList l;
+        for (int i = 0; i < hash.size(); i++) {
+            l << sorter.at(i).first;
+        }
+        QVector<QVector<quint32> > tempConfusionMatrix;
+        tempConfusionMatrix.resize(hash.size());
+        for (int j = 0; j < confusionMatrix.size(); j++) {
+            for (int i = 0; i < sorter.size(); i++) {
+                tempConfusionMatrix[j] << confusionMatrix.at(j).at(sorter.at(i).second);
+            }
+        }
+        confusionMatrix = tempConfusionMatrix;
+        for (int j = 0; j < confusionMatrix.size(); j++) {
+            tempConfusionMatrix[j] = confusionMatrix.at(sorter.at(j).second);
+        }
+        confusionMatrix = tempConfusionMatrix;
+        qDebug() << "\t" << l.join("\t");
+        qDebug() << QString(l.join("\t").size(), '-');
+        for (int i = 0; i < confusionMatrix.size(); i++) {
+            QStringList list;
+            list << sorter.at(i).first;
+            for (int j = 0; j < confusionMatrix.size(); j++) {
+                list << QString::number(confusionMatrix[i][j]);
+            }
+            const QString joined(list.join("\t"));
+            qDebug() << joined;
+            qDebug() << QString(joined.size(), '-');
+        }
+        qDebug() << "correct: " << ((float)correct / (float)classes.at(w).size()) * 100 << "%";
+    }
 	return 0;
 }

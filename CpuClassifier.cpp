@@ -16,7 +16,7 @@ CpuClassifier::CpuClassifier()
 {
 }
 
-QVector<int> CpuClassifier::classify(const float *trainFeatures,
+QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
 									 const float *testFeatures,
 									 const int *trainClasses,
 									 const int *testClasses,
@@ -29,7 +29,7 @@ QVector<int> CpuClassifier::classify(const float *trainFeatures,
 	for (quint32 i = 0; i < testItemCount * trainItemCount; i++) {
 		dist[i] = 0;
 	}
-	int *resultArr = new int[testItemCount];
+    QVector<SortItem> *resultArr = new QVector<SortItem>[testItemCount];
 
 #pragma omp parallel for
     for (quint32 i = 0; i < testItemCount; i++) {
@@ -50,25 +50,38 @@ QVector<int> CpuClassifier::classify(const float *trainFeatures,
 		qSort(sortVec);
 		int count = sortVec.size() - k.at(0);
 		sortVec.remove(k.at(0), count);
-		QHash<int, int> h;
-		for (int j = 0; j < sortVec.size(); j++) {
-			h[sortVec.at(j).mClass] += 1;
-		}
-		QVector<QPair<int, int> > pairVec;
-		pairVec.reserve(sortVec.size());
-		for (QHash<int, int>::const_iterator it = h.begin(); it != h.end(); it++) {
-			pairVec.append(qMakePair(it.value(), it.key()));
-		}
-        qSort(pairVec);
-		resultArr[i] = pairVec.at(0).second;
+
+        resultArr[i] = sortVec;
+
         //qDebug() << "testItem stop" << i;
 	}
-	delete [] dist;
-	QVector<int> result;
-	result.reserve(testItemCount);
-	for (quint32 i = 0; i < testItemCount; i++) {
-		result.append(resultArr[i]);
-	}
-	delete [] resultArr;
-	return result;
+
+    QVector<QVector<int> > result;
+    result.resize(k.size());
+    for (int i = 0; i < k.size(); i++) {
+        result[i].reserve(testItemCount);
+    }
+
+    for (int i = 0; i < k.size(); i++) {
+        QVector<int> resTemp;
+        resTemp.reserve(testItemCount);
+        for (int w = 0; w < testItemCount; w++) {
+            QHash<int, int> h;
+            for (int j = 0; j < k.at(i); j++) {
+                h[resultArr[w].at(j).mClass] += 1;
+            }
+            QVector<QPair<int, int> > pairVec;
+            pairVec.reserve(k.at(i));
+            for (QHash<int, int>::const_iterator it = h.begin(); it != h.end(); it++) {
+                pairVec.append(qMakePair(it.value(), it.key()));
+            }
+            qSort(pairVec);
+            resTemp << pairVec.at(0).second;
+        }
+        result[i] = resTemp;
+    }
+
+    delete [] dist;
+    delete [] resultArr;
+    return result;
 }

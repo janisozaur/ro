@@ -7,7 +7,7 @@ class CpuClassifier : public ClassifierInterface
 {
 public:
 	CpuClassifier();
-	QVector<int> classify(const float *trainFeatures,
+    QVector<QVector<int> > classify(const float *trainFeatures,
 						  const float *testFeatures,
 						  const int *trainClasses,
 						  const int *testClasses,

@@ -7,7 +7,7 @@ class ClassifierInterface
 {
 public:
 	ClassifierInterface();
-	virtual QVector<int> classify(const float *trainFeatures,
+    virtual QVector<QVector<int> > classify(const float *trainFeatures,
 								  const float *testFeatures,
 								  const int *trainClasses,
 								  const int *testClasses,
