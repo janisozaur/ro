@@ -5,22 +5,32 @@
 
 #include <QDebug>
 
+FeatureImporter::FeatureImporter() :
+    mData(NULL)
+{
+}
+
 FeatureImporter::FeatureImporter(QIODevice *data)
 {
-	QTextStream stream(data);
-	mName = stream.readLine();
-	stream >> mItemCount;
-	stream >> mFeatureCount;
-	mData = new float[mItemCount * mFeatureCount];
+    open(data);
+}
+
+void FeatureImporter::open(QIODevice *data)
+{
+    QTextStream stream(data);
+    mName = stream.readLine();
+    stream >> mItemCount;
+    stream >> mFeatureCount;
+    mData = new float[mItemCount * mFeatureCount];
     mLabels.reserve(mItemCount);
-	for (unsigned int i = 0; i < mItemCount; i++) {
-		QString label;
-		stream >> label;
-		for (unsigned int j = 0; j < mFeatureCount; j++) {
-			stream >> mData[i * mFeatureCount + j];
-		}
-		mLabels << label;
-	}
+    for (unsigned int i = 0; i < mItemCount; i++) {
+        QString label;
+        stream >> label;
+        for (unsigned int j = 0; j < mFeatureCount; j++) {
+            stream >> mData[i * mFeatureCount + j];
+        }
+        mLabels << label;
+    }
 }
 
 FeatureImporter::~FeatureImporter()

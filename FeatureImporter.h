@@ -9,6 +9,7 @@ class QIODevice;
 class FeatureImporter
 {
 public:
+    FeatureImporter();
 	FeatureImporter(QIODevice *data);
 	~FeatureImporter();
 	const float *featuresForItem(const quint32 itemNumber) const;
@@ -18,6 +19,7 @@ public:
 	quint32 featuresPerItem() const;
 	quint32 itemCount() const;
 	QString name() const;
+    void open(QIODevice *data);
 
 private:
 	float *mData;
