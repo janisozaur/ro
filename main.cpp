@@ -122,19 +122,18 @@ int main(int argc, char *argv[])
             }
         }
 #endif
-        qDebug() << "\t" << l.join("\t");
-        qDebug() << QString(l.join("\t").size(), '-');
+        QTextStream stream(stdout);;
+        stream << "\t&\t" << l.join("\t&\t") << "\\\\" << endl;
         for (int i = 0; i < confusionMatrix.size(); i++) {
             QStringList list;
             list << sorter.at(i).first;
             for (int j = 0; j < confusionMatrix.size(); j++) {
-                list << QString::number(confusionMatrix[i][j]);
+                list << QString::number(confusionMatrix[i][j], 'g', 4);
             }
-            const QString joined(list.join("\t"));
-            qDebug() << joined;
-            qDebug() << QString(joined.size(), '-');
+            const QString joined(list.join("\t&\t"));
+            stream << joined << "\\\\" << endl;
         }
-        qDebug() << "correct: " << ((float)correct / (float)classes.at(w).size()) * 100 << "%";
+        stream << "correct: " << ((float)correct / (float)classes.at(w).size()) * 100 << "%" << endl;
     }
 	return 0;
 }
