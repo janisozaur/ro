@@ -60,6 +60,7 @@ QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
             sortVec.remove(k.at(0), count);
 
             resultArr[i] = sortVec;
+            resultArr[i].squeeze();
             //qDebug() << "testItem stop" << i;
         }
     }
