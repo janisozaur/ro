@@ -134,5 +134,7 @@ int main(int argc, char *argv[])
         }
         stream << "correct: " << ((float)correct / (float)classes.at(w).size()) * 100 << "%" << endl;
     }
+    msecs = timer.elapsed();
+    qDebug() << "everything took" << msecs << "msecs";
 	return 0;
 }
