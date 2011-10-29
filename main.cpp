@@ -27,8 +27,12 @@ int main(int argc, char *argv[])
 		qFatal("Failed to open test file %s.\n", testFile.fileName().toStdString().c_str());
 	}
 
+    QElapsedTimer loadTimer;
+    loadTimer.start();
 	FeatureImporter trainFeatures(&trainFile);
 	FeatureImporter testFeatures(&testFile);
+    int loadMsecs = loadTimer.elapsed();
+    qDebug() << "loading took" << loadMsecs << "msecs";
 
 	trainFile.close();
 	testFile.close();
@@ -46,10 +50,11 @@ int main(int argc, char *argv[])
 		trainClasses.append(index);
 	}
 
-	ClassifierInterface *ci = new CpuClassifier();
+    ClassifierInterface *ci = new CpuClassifier();
 	QVector<int> classes;
 	QElapsedTimer timer;
 	timer.start();
+    qDebug() << "starting classification";
 	classes = ci->classify(trainFeatures.features(), testFeatures.features(),
 						   trainClasses.constData(), NULL,
 						   testFeatures.featuresPerItem(),
@@ -58,15 +63,18 @@ int main(int argc, char *argv[])
 	int msecs = timer.elapsed();
 	qDebug() << "calculations took" << msecs << "msecs";
 	int correct = 0;
+    QStringList classesStrings;
 	for (int i = 0; i < classes.size(); i++) {
 		/*qDebug() << i;
 		qDebug() << classes.at(i);
 		qDebug() << hash.at(classes.at(i));
 		qDebug() << testFeatures.labels().at(i);*/
+        classesStrings << hash.at(classes.at(i));
 		if (hash.at(classes.at(i)) == testFeatures.labels().at(i)) {
 			correct++;
 		}
 	}
+    qDebug() << "classes:" << classesStrings.join(" ");
 	qDebug() << "correct: " << ((float)correct / (float)classes.size()) * 100 << "%";
 	return 0;
 }
