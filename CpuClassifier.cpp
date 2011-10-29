@@ -18,8 +18,8 @@ CpuClassifier::CpuClassifier()
 
 QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
 									 const float *testFeatures,
-									 const int *trainClasses,
-									 const int *testClasses,
+                                     const qint8 *trainClasses,
+                                     const qint8 */*testClasses*/,
 									 const quint32 featuresPerItem,
 									 const quint32 trainItemCount,
 									 const quint32 testItemCount,

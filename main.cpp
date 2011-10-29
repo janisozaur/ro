@@ -40,9 +40,9 @@ int main(int argc, char *argv[])
 	testFile.close();
 
 	QVector<QString> hash;
-	QVector<int> trainClasses;
+    QVector<qint8> trainClasses;
 	for (int i = 0; i < trainFeatures.labels().size(); i++) {
-		int index = hash.indexOf(trainFeatures.labels().at(i));
+        qint8 index = hash.indexOf(trainFeatures.labels().at(i));
 		if (index == -1) {
 			QString dbg("Appending label \"%1\" to hash at position %2. It has now value \"%3\"");
 			hash.append(trainFeatures.labels().at(i));
