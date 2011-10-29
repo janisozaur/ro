@@ -31,8 +31,19 @@ int main(int argc, char *argv[])
 
     QElapsedTimer loadTimer;
     loadTimer.start();
-	FeatureImporter trainFeatures(&trainFile);
-	FeatureImporter testFeatures(&testFile);
+    FeatureImporter trainFeatures;
+    FeatureImporter testFeatures;
+#pragma omp sections
+    {
+#pragma omp section
+        {
+            trainFeatures.open(&trainFile);
+        }
+#pragma omp section
+        {
+            testFeatures.open(&testFile);
+        }
+    }
     int loadMsecs = loadTimer.elapsed();
     qDebug() << "loading took" << loadMsecs << "msecs";
 
