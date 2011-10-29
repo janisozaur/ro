@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
         }
 #endif
         QTextStream stream(stdout);
-        stream << "k: " << k.at(w);
+        stream << "k: " << k.at(w) << endl;
         stream << "\t&\t" << l.join("\t&\t") << "\\\\" << endl;
         for (int i = 0; i < confusionMatrix.size(); i++) {
             QStringList list;
