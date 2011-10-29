@@ -115,10 +115,10 @@ int main(int argc, char *argv[])
         for (int i = 0; i < confusionMatrix.size(); i++) {
             qreal sum = 0;
             for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
-                sum += confusionMatrix.at(i).at(j);
+                sum += confusionMatrix.at(j).at(i);
             }
             for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
-                confusionMatrix[i][j] = confusionMatrix.at(i).at(j) / sum * 100.0;
+                confusionMatrix[j][i] = confusionMatrix.at(j).at(i) / sum * 100.0;
             }
         }
 #endif
