@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
 						   testFeatures.featuresPerItem(),
 						   trainFeatures.itemCount(), testFeatures.itemCount(),
                            k);
+    delete ci;
 	int msecs = timer.elapsed();
 	qDebug() << "calculations took" << msecs << "msecs";
     for (int w = 0; w < classes.size(); w++) {
