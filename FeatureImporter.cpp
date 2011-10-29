@@ -12,6 +12,7 @@ FeatureImporter::FeatureImporter(QIODevice *data)
 	stream >> mItemCount;
 	stream >> mFeatureCount;
 	mData = new float[mItemCount * mFeatureCount];
+    mLabels.reserve(mItemCount);
 	for (unsigned int i = 0; i < mItemCount; i++) {
 		QString label;
 		stream >> label;
