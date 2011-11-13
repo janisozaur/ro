@@ -23,18 +23,12 @@ SOURCES += main.cpp \
     ClassifierInterface.cpp \
     FeatureImporter.cpp \
     CpuClassifier.cpp \
-    SortItem.cpp
+    SortItem.cpp \
+    NaiveClassifier.cpp
 
 HEADERS += \
     ClassifierInterface.h \
     FeatureImporter.h \
     CpuClassifier.h \
-    SortItem.h
-
-
-
-
-
-
-
-
+    SortItem.h \
+    NaiveClassifier.h
