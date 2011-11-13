@@ -11,6 +11,7 @@
 #include <QDebug>
 
 #define T 3
+#define SSE_VECT
 
 CpuClassifier::CpuClassifier()
 {
@@ -37,18 +38,38 @@ QVector<QVector<int> > CpuClassifier::classify(const float *trainFeatures,
         for (quint32 i = 0; i < (testItemCount / chunks) * trainItemCount; i++) {
             dist[i] = 0;
         }
+		quint32 start_i = (testItemCount / chunks) * c;
+		quint32 stop_i = (testItemCount / chunks) * (c + 1);
 #pragma omp parallel for
-        for (quint32 i = (testItemCount / chunks) * c; i < (testItemCount / chunks) * (c + 1); i++) {
+        for (quint32 i = start_i; i < stop_i; i++) {
             QVector<SortItem> sortVec;
             sortVec.reserve(trainItemCount);
             //qDebug() << "testItem start" << i;
             for (quint32 j = 0; j < trainItemCount; j++) {
                 SortItem si;
+#ifdef SSE_VECT
+                for (quint32 k = 0; k < featuresPerItem; k += 4) {
+#else
                 for (quint32 k = 0; k < featuresPerItem; k++) {
-                    float temp = fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]);
-                    temp = temp * temp * temp;
+#endif
+                    float temp1 = fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]);
+#ifdef SSE_VECT
+                    float temp2 = fabs(testFeatures[i * featuresPerItem + k + 1] - trainFeatures[j * featuresPerItem + k + 1]);
+                    float temp3 = fabs(testFeatures[i * featuresPerItem + k + 2] - trainFeatures[j * featuresPerItem + k + 2]);
+                    float temp4 = fabs(testFeatures[i * featuresPerItem + k + 3] - trainFeatures[j * featuresPerItem + k + 3]);
+#endif
+                    temp1 = temp1 * temp1 * temp1;
+#ifdef SSE_VECT
+                    temp2 = temp2 * temp2 * temp2;
+                    temp3 = temp3 * temp3 * temp3;
+                    temp4 = temp4 * temp4 * temp4;
+#endif
                     //dist[i * trainItemCount + j] += pow(fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]), 3.0f);
-                    dist[(i - (testItemCount / chunks) * c) * trainItemCount + j] += temp;
+#ifdef SSE_VECT
+                    dist[(i - (testItemCount / chunks) * c) * trainItemCount + j] += temp1 + temp2 + temp3 + temp4;
+#else
+                    dist[(i - (testItemCount / chunks) * c) * trainItemCount + j] += temp1;
+#endif
                 }
                 dist[(i - (testItemCount / chunks) * c) * trainItemCount + j] = pow(dist[(i - (testItemCount / chunks) * c) * trainItemCount + j], 1.0f / 3.0f);
                 si.mDistance = dist[(i - (testItemCount / chunks) * c) * trainItemCount + j];
