@@ -6,6 +6,8 @@
 #include <QPair>
 #include <QHash>
 
+#define SSE_VECT
+
 NaiveClassifier::NaiveClassifier()
 {
 }
@@ -31,10 +33,30 @@ QVector<QVector<int> > NaiveClassifier::classify(const float *trainFeatures,
         SortingQueue q(k.at(0));
         for (quint32 j = 0; j < trainItemCount; j++) {
             float distanceSum = 0;
+#ifdef SSE_VECT
+            for (quint32 k = 0; k < featuresPerItem; k += 4) {
+#else
             for (quint32 k = 0; k < featuresPerItem; k++) {
-                float featureDistance = fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]);
-                featureDistance = featureDistance * featureDistance * featureDistance;
-                distanceSum += featureDistance;
+#endif
+                float featureDistance1 = fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]);
+#ifdef SSE_VECT
+                float featureDistance2 = fabs(testFeatures[i * featuresPerItem + k + 1] - trainFeatures[j * featuresPerItem + k + 1]);
+                float featureDistance3 = fabs(testFeatures[i * featuresPerItem + k + 2] - trainFeatures[j * featuresPerItem + k + 2]);
+                float featureDistance4 = fabs(testFeatures[i * featuresPerItem + k + 3] - trainFeatures[j * featuresPerItem + k + 3]);
+#endif
+                featureDistance1 = featureDistance1 * featureDistance1 * featureDistance1;
+#ifdef SSE_VECT
+                featureDistance2 = featureDistance2 * featureDistance2 * featureDistance2;
+                featureDistance3 = featureDistance3 * featureDistance3 * featureDistance3;
+                featureDistance4 = featureDistance4 * featureDistance4 * featureDistance4;
+#endif
+#ifdef SSE_VECT
+                const float dist12 = featureDistance1 + featureDistance2;
+                const float dist34 = featureDistance3 + featureDistance4;
+                distanceSum += dist12 + dist34;
+#else
+                distanceSum += featureDistance1;
+#endif
             }
             distanceSum = pow(distanceSum, power);
             q.tryAdd(qMakePair(distanceSum, trainClasses[j]));
