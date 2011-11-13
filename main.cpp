@@ -1,10 +1,13 @@
 #include "FeatureImporter.h"
 #include "CpuClassifier.h"
+#include "NaiveClassifier.h"
 
 #include <QtCore/QCoreApplication>
 #include <QDebug>
 #include <QFile>
 #include <QElapsedTimer>
+#include <QHostInfo>
+#include <QTextCodec>
 
 #define PERCENTAGE_CONFUSION
 
@@ -69,7 +72,7 @@ int main(int argc, char *argv[])
 		trainClasses.append(index);
 	}
 
-    ClassifierInterface *ci = new CpuClassifier();
+    ClassifierInterface *ci = new NaiveClassifier();
     QVector<QVector<int> > classes;
     qDebug() << "starting classification";
     QList<int> k;
@@ -100,7 +103,17 @@ int main(int argc, char *argv[])
     delete ci;
 	int msecs = timer.elapsed();
 	qDebug() << "calculations took" << msecs << "msecs";
+    qDebug() << "there are" << classes.size() << "k-s";
+    QString filenameBase("gnuplot_%1_%2_%3_%4.dat");
+    QString hostname(QHostInfo::localHostName());
+    QString filename(filenameBase.arg(testFeatures.name(), QString::number(trainFeatures.itemCount()), QString::number(testFeatures.itemCount()), hostname));
+    QFile gnuplotFile(filename);
+    if (!gnuplotFile.open(QIODevice::WriteOnly)) {
+        qFatal("failed to open file %s for writing.\n", filename.toStdString().c_str());
+    }
+    QTextStream gnuplotStream(&gnuplotFile);
     for (int w = 0; w < classes.size(); w++) {
+        //qDebug() << "w:" << w;
         int correct = 0;
         QVector<QVector<qreal> > confusionMatrix;
         confusionMatrix.resize(hash.size());
@@ -112,11 +125,14 @@ int main(int argc, char *argv[])
             qDebug() << classes.at(i);
             qDebug() << hash.at(classes.at(i));
             qDebug() << testFeatures.labels().at(i);*/
-            confusionMatrix[hash.indexOf(testFeatures.labels().at(i))][classes.at(w).at(i)]++;
+            const QString key(testFeatures.labels().at(i));
+            const int keyIdx = hash.indexOf(key);
+            const int classIdx = classes.at(w).at(i);
+            confusionMatrix[keyIdx][classIdx]++;
             /*if (hash.at(classes.at(w).at(i)) == QString("5")) {
                 qDebug() << "is 5, should be " << testFeatures.labels().at(i);
             }*/
-            if (hash.at(classes.at(w).at(i)) == testFeatures.labels().at(i)) {
+            if (hash.at(classIdx) == key) {
                 correct++;
             }
         }
@@ -127,7 +143,7 @@ int main(int argc, char *argv[])
         qSort(sorter);
         QStringList l;
         for (int i = 0; i < hash.size(); i++) {
-            l << sorter.at(i).first;
+            l << sorter.at(i).first; //hash.at(i);
         }
         QVector<QVector<qreal> > tempConfusionMatrix;
         tempConfusionMatrix.resize(hash.size());
@@ -145,27 +161,44 @@ int main(int argc, char *argv[])
         for (int i = 0; i < confusionMatrix.size(); i++) {
             qreal sum = 0;
             for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
-                sum += confusionMatrix.at(j).at(i);
+                sum += confusionMatrix.at(i).at(j);
             }
-            for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
-                confusionMatrix[j][i] = confusionMatrix.at(j).at(i) / sum * 100.0;
+            if (sum != 0) {
+                for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
+                    confusionMatrix[i][j] = confusionMatrix.at(i).at(j) / sum * 100.0;
+                }
+            } else {
+                for (int j = 0; j < confusionMatrix.at(i).size(); j++) {
+                    confusionMatrix[i][j] = 0;
+                }
             }
         }
 #endif
         QTextStream stream(stdout);
-        stream << "k: " << k.at(w) << endl;
-        stream << "\t&\t" << l.join("\t&\t") << "\\\\" << endl;
+        //stream << "k: " << k.at(w) << endl;
+        stream << "\\begin{table}" << endl
+               << "\\centering" << endl
+               << QString("\\caption{Macierz wyników ekstraktora \\texttt{%1} dla $k = %2$. Ogólna skuteczność: %3%}").arg(testFeatures.name(), QString::number(k.at(w)), QString::number(((float)correct / (float)classes.at(w).size()) * 100)) << endl
+               << QString("\\label{tab:confusion_%1_%2}").arg(testFeatures.name(), QString::number(k.at(w))) << endl
+               << "\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}" << endl;
+        stream << "\t&\t" << l.join("\t&\t") << "\\\\" << endl << "\\hline" << endl;
         for (int i = 0; i < confusionMatrix.size(); i++) {
             QStringList list;
-            list << sorter.at(i).first;
+            list << sorter.at(i).first; //hash.at(i);
             for (int j = 0; j < confusionMatrix.size(); j++) {
-                list << QString::number(confusionMatrix[i][j], 'g', 4);
+                list << QString::number(confusionMatrix[j][i], 'g', 4);
             }
             const QString joined(list.join("\t&\t"));
-            stream << joined << "\\\\" << endl;
+            stream << joined << "\\\\" << endl << "\\hline" << endl;
         }
-        stream << "correct: " << ((float)correct / (float)classes.at(w).size()) * 100 << "%" << endl;
+        stream << "\\end{tabular}" << endl
+               << "\\end{table}" << endl << endl;
+        //stream << "correct: " << ((float)correct / (float)classes.at(w).size()) * 100 << "%" << endl;
+        qDebug() << "gnuplot file: " << filename;
+        gnuplotStream << k.at(w) << ' ' << ((float)correct / (float)classes.at(w).size()) * 100 << endl;
+
     }
+    gnuplotFile.close();
     msecs = timer.elapsed();
     qDebug() << "everything took" << msecs << "msecs";
 	return 0;
