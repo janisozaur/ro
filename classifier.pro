@@ -14,6 +14,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS += -fopenmp
 QMAKE_CXXFLAGS += -mtune=core2 -march=core2 -O2
 
@@ -24,11 +25,13 @@ SOURCES += main.cpp \
     FeatureImporter.cpp \
     CpuClassifier.cpp \
     SortItem.cpp \
-    NaiveClassifier.cpp
+    NaiveClassifier.cpp \
+    SortingQueue.cpp
 
 HEADERS += \
     ClassifierInterface.h \
     FeatureImporter.h \
     CpuClassifier.h \
     SortItem.h \
-    NaiveClassifier.h
+    NaiveClassifier.h \
+    SortingQueue.h
