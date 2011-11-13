@@ -67,7 +67,21 @@ int main(int argc, char *argv[])
     QVector<QVector<int> > classes;
     qDebug() << "starting classification";
     QList<int> k;
-    for (int i = 50; i >= 1; i--) {
+
+    bool ok = true;
+    int i = 50;
+    if (args.size() >= 4) {
+        i = qMax(0, args.at(3).toInt(&ok));
+        qDebug() << "i =" << i;
+    } else {
+        ok = false;
+    }
+    if (!ok) {
+        qDebug() << "no k given, assuming k = 50";
+        i = 50;
+    }
+    qDebug() << "initial k:" << i;
+    for (; i >= 1; i--) {
         k.append(i);
     }
     QElapsedTimer timer;
