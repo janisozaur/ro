@@ -11,6 +11,12 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+    // set encoding
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
 	QStringList args = a.arguments();
 	if (args.size() < 3) {
 		QStringList usage;
