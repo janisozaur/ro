@@ -1,4 +1,5 @@
 #include "NaiveClassifier.h"
+#include "SortingQueue.h"
 
 #include <cmath>
 #include <QVector>
@@ -26,8 +27,8 @@ QVector<QVector<int> > NaiveClassifier::classify(const float *trainFeatures,
     QVector<int> *resultPtr = result.data();
 #pragma omp parallel for
     for (quint32 i = 0; i < testItemCount; i++) {
-        QVector<QPair<float, qint8> > distances(trainItemCount);
-        QPair<float, qint8> *distancesPtr = distances.data();
+        QVector<QPair<float, qint8> > distances;
+        SortingQueue q(k.at(0));
         for (quint32 j = 0; j < trainItemCount; j++) {
             float distanceSum = 0;
             for (quint32 k = 0; k < featuresPerItem; k++) {
@@ -36,9 +37,9 @@ QVector<QVector<int> > NaiveClassifier::classify(const float *trainFeatures,
                 distanceSum += featureDistance;
             }
             distanceSum = pow(distanceSum, power);
-            distancesPtr[j] = qMakePair(distanceSum, trainClasses[j]);
+            q.tryAdd(qMakePair(distanceSum, trainClasses[j]));
         }
-        qSort(distances);
+        distances = q.toVector();
         for (int w = 0; w < k.size(); w++) {
             QHash<qint8, int> occurences;
             for (int j = 0; j < k.at(w); j++) {
