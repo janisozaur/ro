@@ -10,11 +10,9 @@ void SortingQueue::tryAdd(const QPair<float, qint8> &element)
     if (mList.size() < mSize) {
         if (mList.size() == 0) {
             mList.append(element);
-            mFarthest = element.first;
             return;
         } else {
             auto it = mList.begin();
-            mFarthest = element.first;
             for(; it != mList.end(); ++it) {
                 if (element < (*it)) {
                     mList.insert(it, element);
@@ -23,9 +21,8 @@ void SortingQueue::tryAdd(const QPair<float, qint8> &element)
             }
             mList.insert(it, element);
         }
-    } else if (element.first < mFarthest) {
+    } else if (element.first < mList.last().first) {
         mList.removeLast();
-        mFarthest = element.first;
 
         auto it = mList.begin();
         for (; it != mList.end(); ++it) {
