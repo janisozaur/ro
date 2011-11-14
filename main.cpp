@@ -178,15 +178,16 @@ int main(int argc, char *argv[])
         //stream << "k: " << k.at(w) << endl;
         stream << "\\begin{table}" << endl
                << "\\centering" << endl
-               << QString("\\caption{Macierz wyników ekstraktora \\texttt{%1} dla $k = %2$. Ogólna skuteczność: %3%}").arg(testFeatures.name(), QString::number(k.at(w)), QString::number(((float)correct / (float)classes.at(w).size()) * 100)) << endl
+               << QString("\\caption{Macierz wyników ekstraktora \\texttt{%1} dla $k = %2$. Ogólna skuteczność: %3\\%}").arg(testFeatures.name(), QString::number(k.at(w)), QString::number(((float)correct / (float)classes.at(w).size()) * 100)) << endl
                << QString("\\label{tab:confusion_%1_%2}").arg(testFeatures.name(), QString::number(k.at(w))) << endl
-               << "\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}" << endl;
+               << "\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}" << endl
+               << "\\hline" << endl;
         stream << "\t&\t" << l.join("\t&\t") << "\\\\" << endl << "\\hline" << endl;
         for (int i = 0; i < confusionMatrix.size(); i++) {
             QStringList list;
             list << sorter.at(i).first; //hash.at(i);
             for (int j = 0; j < confusionMatrix.size(); j++) {
-                list << QString::number(confusionMatrix[j][i], 'g', 4);
+                list << QString::number(confusionMatrix[j][i], 'g', 3);
             }
             const QString joined(list.join("\t&\t"));
             stream << joined << "\\\\" << endl << "\\hline" << endl;
