@@ -1,4 +1,4 @@
-#include "NaiveClassifier.h"
+#include "KnnClassifier.h"
 #include "SortingQueue.h"
 
 #include <cmath>
@@ -8,7 +8,7 @@
 
 #define SSE_VECT
 
-NaiveClassifier::NaiveClassifier(const qint8 &k, const FeatureImporter &trainData) :
+KnnClassifier::KnnClassifier(const qint8 &k, const FeatureImporter &trainData) :
     mTrainData(trainData), mTrainFeatures(trainData.features()), mTrainItemCount(trainData.itemCount()),
     mFeaturesPerItem(trainData.featuresPerItem()), mTrainClasses(trainData.classesId().data())
 {
@@ -17,7 +17,7 @@ NaiveClassifier::NaiveClassifier(const qint8 &k, const FeatureImporter &trainDat
     }
 }
 
-qint8 NaiveClassifier::classify(const float *testFeatures)
+qint8 KnnClassifier::classify(const float *testFeatures)
 {
     const float power = 1.0f / 3.0f;
     QVector<qint8> result(mKValues.size());
@@ -74,7 +74,7 @@ qint8 NaiveClassifier::classify(const float *testFeatures)
     return result.at(0);
 }
 
-QVector<qint8> NaiveClassifier::fullClassification() const
+QVector<qint8> KnnClassifier::fullClassification() const
 {
     return mClassificationTemp;
 }

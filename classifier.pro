@@ -24,12 +24,12 @@ SOURCES += main.cpp \
     ClassifierInterface.cpp \
     FeatureImporter.cpp \
     SortItem.cpp \
-    NaiveClassifier.cpp \
+    KnnClassifier.cpp \
     SortingQueue.cpp
 
 HEADERS += \
     ClassifierInterface.h \
     FeatureImporter.h \
     SortItem.h \
-    NaiveClassifier.h \
+    KnnClassifier.h \
     SortingQueue.h

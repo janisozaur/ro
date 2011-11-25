@@ -1,13 +1,13 @@
-#ifndef NAIVECLASSIFIER_H
-#define NAIVECLASSIFIER_H
+#ifndef KNNCLASSIFIER_H
+#define KNNCLASSIFIER_H
 
 #include "ClassifierInterface.h"
 #include "FeatureImporter.h"
 
-class NaiveClassifier : public ClassifierInterface
+class KnnClassifier : public ClassifierInterface
 {
 public:
-    NaiveClassifier(const qint8 &k, const FeatureImporter &trainData);
+    KnnClassifier(const qint8 &k, const FeatureImporter &trainData);
     qint8 classify(const float *testFeatures);
     QVector<qint8> fullClassification() const;
 
@@ -21,4 +21,4 @@ private:
     const qint8 *mTrainClasses;
 };
 
-#endif // NAIVECLASSIFIER_H
+#endif // KNNCLASSIFIER_H

@@ -1,5 +1,5 @@
 #include "FeatureImporter.h"
-#include "NaiveClassifier.h"
+#include "KnnClassifier.h"
 
 #include <QtCore/QCoreApplication>
 #include <QDebug>
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     }
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
     for (int i = 0; i < threadCount; i++) {
-        ci[i] = new NaiveClassifier(k, trainFeatures);
+        ci[i] = new KnnClassifier(k, trainFeatures);
     }
 
     QVector<qint8> classes(testFeatures.itemCount());
