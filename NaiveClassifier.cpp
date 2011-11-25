@@ -8,75 +8,73 @@
 
 #define SSE_VECT
 
-NaiveClassifier::NaiveClassifier()
+NaiveClassifier::NaiveClassifier(const qint8 &k, const FeatureImporter &trainData) :
+    mTrainData(trainData), mTrainFeatures(trainData.features()), mTrainItemCount(trainData.itemCount()),
+    mFeaturesPerItem(trainData.featuresPerItem()), mTrainClasses(trainData.classesId().data())
 {
+    for (qint8 i = k; i > 0; i--) {
+        mKValues.append(i);
+    }
 }
 
-QVector<QVector<int> > NaiveClassifier::classify(const float *trainFeatures,
-                                     const float *testFeatures,
-                                     const qint8 *trainClasses,
-                                     const qint8 */*testClasses*/,
-                                     const quint32 featuresPerItem,
-                                     const quint32 trainItemCount,
-                                     const quint32 testItemCount,
-                                     const QList<int> k)
+qint8 NaiveClassifier::classify(const float *testFeatures)
 {
     const float power = 1.0f / 3.0f;
-    QVector<QVector<int> > result(k.size());
-    for (int i = 0; i < result.size(); i++) {
-        result[i].resize(testItemCount);
-    }
-    QVector<int> *resultPtr = result.data();
-#pragma omp parallel for
-    for (quint32 i = 0; i < testItemCount; i++) {
-        QVector<QPair<float, qint8> > distances;
-        SortingQueue q(k.at(0));
-        for (quint32 j = 0; j < trainItemCount; j++) {
-            float distanceSum = 0;
+    QVector<qint8> result(mKValues.size());
+    qint8 *resultPtr = result.data();
+    QVector<QPair<float, qint8> > distances;
+    SortingQueue q(mKValues.at(0));
+    for (quint32 j = 0; j < mTrainItemCount; j++) {
+        float distanceSum = 0;
 #ifdef SSE_VECT
-            for (quint32 k = 0; k < featuresPerItem; k += 4) {
+        for (quint32 k = 0; k < mFeaturesPerItem; k += 4) {
 #else
-            for (quint32 k = 0; k < featuresPerItem; k++) {
+        for (quint32 k = 0; k < featuresPerItem; k++) {
 #endif
-                float featureDistance1 = fabs(testFeatures[i * featuresPerItem + k] - trainFeatures[j * featuresPerItem + k]);
+            float featureDistance1 = fabs(testFeatures[k] - mTrainFeatures[j * mFeaturesPerItem + k]);
 #ifdef SSE_VECT
-                float featureDistance2 = fabs(testFeatures[i * featuresPerItem + k + 1] - trainFeatures[j * featuresPerItem + k + 1]);
-                float featureDistance3 = fabs(testFeatures[i * featuresPerItem + k + 2] - trainFeatures[j * featuresPerItem + k + 2]);
-                float featureDistance4 = fabs(testFeatures[i * featuresPerItem + k + 3] - trainFeatures[j * featuresPerItem + k + 3]);
+            float featureDistance2 = fabs(testFeatures[k + 1] - mTrainFeatures[j * mFeaturesPerItem + k + 1]);
+            float featureDistance3 = fabs(testFeatures[k + 2] - mTrainFeatures[j * mFeaturesPerItem + k + 2]);
+            float featureDistance4 = fabs(testFeatures[k + 3] - mTrainFeatures[j * mFeaturesPerItem + k + 3]);
 #endif
-                featureDistance1 = featureDistance1 * featureDistance1 * featureDistance1;
+            featureDistance1 = featureDistance1 * featureDistance1 * featureDistance1;
 #ifdef SSE_VECT
-                featureDistance2 = featureDistance2 * featureDistance2 * featureDistance2;
-                featureDistance3 = featureDistance3 * featureDistance3 * featureDistance3;
-                featureDistance4 = featureDistance4 * featureDistance4 * featureDistance4;
+            featureDistance2 = featureDistance2 * featureDistance2 * featureDistance2;
+            featureDistance3 = featureDistance3 * featureDistance3 * featureDistance3;
+            featureDistance4 = featureDistance4 * featureDistance4 * featureDistance4;
 #endif
 #ifdef SSE_VECT
-                const float dist12 = featureDistance1 + featureDistance2;
-                const float dist34 = featureDistance3 + featureDistance4;
-                distanceSum += dist12 + dist34;
+            const float dist12 = featureDistance1 + featureDistance2;
+            const float dist34 = featureDistance3 + featureDistance4;
+            distanceSum += dist12 + dist34;
 #else
-                distanceSum += featureDistance1;
+            distanceSum += featureDistance1;
 #endif
-            }
-            distanceSum = pow(distanceSum, power);
-            q.tryAdd(qMakePair(distanceSum, trainClasses[j]));
         }
-        distances = q.toVector();
-        for (int w = 0; w < k.size(); w++) {
-            QHash<qint8, int> occurences;
-            for (int j = 0; j < k.at(w); j++) {
-                occurences[distances.at(j).second] += 1;
-            }
-            int max = 0;
-            qint8 objectClass = occurences.keys().at(0);
-            for (int j = 0; j < occurences.size(); j++) {
-                if (occurences.values().at(j) > max) {
-                    max = occurences.values().at(j);
-                    objectClass = occurences.keys().at(j);
-                }
-            }
-            resultPtr[w][i] = objectClass;
-        }
+        distanceSum = pow(distanceSum, power);
+        q.tryAdd(qMakePair(distanceSum, mTrainClasses[j]));
     }
-    return result;
+    distances = q.toVector();
+    for (int w = 0; w < mKValues.size(); w++) {
+        QHash<qint8, int> occurences;
+        for (int j = 0; j < mKValues.at(w); j++) {
+            occurences[distances.at(j).second] += 1;
+        }
+        int max = 0;
+        qint8 objectClass = occurences.keys().at(0);
+        for (int j = 0; j < occurences.size(); j++) {
+            if (occurences.values().at(j) > max) {
+                max = occurences.values().at(j);
+                objectClass = occurences.keys().at(j);
+            }
+        }
+        resultPtr[w] = objectClass;
+    }
+    mClassificationTemp = result;
+    return result.at(0);
+}
+
+QVector<qint8> NaiveClassifier::fullClassification() const
+{
+    return mClassificationTemp;
 }
