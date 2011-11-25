@@ -23,7 +23,6 @@ LIBS += -lgomp
 SOURCES += main.cpp \
     ClassifierInterface.cpp \
     FeatureImporter.cpp \
-    CpuClassifier.cpp \
     SortItem.cpp \
     NaiveClassifier.cpp \
     SortingQueue.cpp
@@ -31,7 +30,6 @@ SOURCES += main.cpp \
 HEADERS += \
     ClassifierInterface.h \
     FeatureImporter.h \
-    CpuClassifier.h \
     SortItem.h \
     NaiveClassifier.h \
     SortingQueue.h

@@ -1,5 +1,4 @@
 #include "FeatureImporter.h"
-#include "CpuClassifier.h"
 #include "NaiveClassifier.h"
 
 #include <QtCore/QCoreApplication>
