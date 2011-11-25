@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QStringList>
+#include <QVector>
 
 class QIODevice;
 
@@ -16,6 +17,9 @@ public:
 	const float *features() const;
 	QString labelForItem(const quint32 itemNumber) const;
 	QStringList labels() const;
+    qint8 classIdForItem(const quint32 itemNumber) const;
+    QVector<qint8> classesId() const;
+    void synchronizeClassId(const FeatureImporter &other);
 	quint32 featuresPerItem() const;
 	quint32 itemCount() const;
 	QString name() const;
@@ -27,6 +31,8 @@ private:
 	quint32 mItemCount;
 	quint32 mFeatureCount;
 	QString mName;
+    QVector<QString> mClassesHash;
+    QVector<qint8> mClassesId;
 
 };
 

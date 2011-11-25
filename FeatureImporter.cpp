@@ -23,6 +23,7 @@ void FeatureImporter::open(QIODevice *data)
     stream >> mFeatureCount;
     mData = new float[mItemCount * mFeatureCount];
     mLabels.reserve(mItemCount);
+
     for (unsigned int i = 0; i < mItemCount; i++) {
         QString label;
         stream >> label;
@@ -30,6 +31,12 @@ void FeatureImporter::open(QIODevice *data)
             stream >> mData[i * mFeatureCount + j];
         }
         mLabels << label;
+        qint8 index = mClassesHash.indexOf(label);
+        if (index == -1) {
+            mClassesHash.append(label);
+            index = mClassesHash.size() - 1;
+        }
+        mClassesId.append(index);
     }
 }
 
@@ -56,6 +63,28 @@ QString FeatureImporter::labelForItem(const quint32 itemNumber) const
 QStringList FeatureImporter::labels() const
 {
 	return mLabels;
+}
+
+qint8 FeatureImporter::classIdForItem(const quint32 itemNumber) const
+{
+    return mClassesId.at(itemNumber);
+}
+
+QVector<qint8> FeatureImporter::classesId() const
+{
+    return mClassesId;
+}
+
+void FeatureImporter::synchronizeClassId(const FeatureImporter &other)
+{
+    for (int i = 0; i < mClassesId.size(); i++) {
+        qint8 newId = other.mClassesHash.indexOf(mLabels.at(i));
+        if (newId == -1) {
+            qCritical() << "there is no id for class" << mLabels.at(i);
+        }
+        mClassesId[i] = newId;
+    }
+    mClassesHash = other.mClassesHash;
 }
 
 quint32 FeatureImporter::featuresPerItem() const
