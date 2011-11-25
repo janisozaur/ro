@@ -7,6 +7,7 @@
 #include <QElapsedTimer>
 #include <QHostInfo>
 #include <QTextCodec>
+#include <omp.h>
 
 #define PERCENTAGE_CONFUSION
 
@@ -60,28 +61,44 @@ int main(int argc, char *argv[])
 	testFile.close();
 
     bool ok = true;
-    int i = 50;
+    int k = 50;
     if (args.size() >= 4) {
-        i = qMax(0, args.at(3).toInt(&ok));
-        qDebug() << "i =" << i;
+        k = qMax(0, args.at(3).toInt(&ok));
+        qDebug() << "k =" << k;
     } else {
         ok = false;
     }
     if (!ok) {
         qDebug() << "no k given, assuming k = 50";
-        i = 50;
+        k = 50;
     }
-    qDebug() << "initial k:" << i;
+    qDebug() << "initial k:" << k;
 
-    ClassifierInterface *ci = new NaiveClassifier(i, trainFeatures);
+    int threadCount;
+#pragma omp parallel
+    {
+#pragma omp single
+        {
+            threadCount = omp_get_num_threads();
+        }
+    }
+    ClassifierInterface **ci = new ClassifierInterface *[threadCount];
+    for (int i = 0; i < threadCount; i++) {
+        ci[i] = new NaiveClassifier(k, trainFeatures);
+    }
 
     QVector<qint8> classes(testFeatures.itemCount());
     qint8 *classesPtr = classes.data();
     qDebug() << "starting classification";
     QElapsedTimer timer;
     timer.start();
-    for (quint32 i = 0; i < testFeatures.itemCount(); i++) {
-        classesPtr[i] = ci->classify(testFeatures.featuresForItem(i));
+#pragma omp parallel
+    {
+        const int threadNum = omp_get_thread_num();
+        #pragma omp for
+        for (quint32 i = 0; i < testFeatures.itemCount(); i++) {
+            classesPtr[i] = ci[threadNum]->classify(testFeatures.featuresForItem(i));
+        }
     }
 	int msecs = timer.elapsed();
     delete ci;
