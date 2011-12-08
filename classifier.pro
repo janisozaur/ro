@@ -32,4 +32,5 @@ HEADERS += \
     FeatureImporter.h \
     SortItem.h \
     KnnClassifier.h \
-    SortingQueue.h
+    SortingQueue.h \
+    NeuralNetwork/NeuralNetworkCommon.h

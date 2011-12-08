@@ -8,17 +8,17 @@ class KnnClassifier : public ClassifierInterface
 {
 public:
     KnnClassifier(const qint8 &k, const FeatureImporter &trainData);
-    qint8 classify(const float *testFeatures);
-    QVector<qint8> fullClassification() const;
+    quint8 classify(const QVector<nnreal> &tf);
+    QVector<quint8> fullClassification() const;
 
 private:
     const FeatureImporter mTrainData;
     const float *mTrainFeatures;
-    QVector<qint8> mClassificationTemp;
+    QVector<quint8> mClassificationTemp;
     QList<qint8> mKValues;
     const quint32 mTrainItemCount;
     const quint32 mFeaturesPerItem;
-    const qint8 *mTrainClasses;
+    const quint8 *mTrainClasses;
 };
 
 #endif // KNNCLASSIFIER_H

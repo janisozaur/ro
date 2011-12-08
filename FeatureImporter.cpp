@@ -31,12 +31,13 @@ void FeatureImporter::open(QIODevice *data)
             stream >> mData[i * mFeatureCount + j];
         }
         mLabels << label;
-        qint8 index = mClassesHash.indexOf(label);
+        qint16 index = mClassesHash.indexOf(label);
         if (index == -1) {
             mClassesHash.append(label);
             index = mClassesHash.size() - 1;
         }
-        mClassesId.append(index);
+        quint8 idx8 = index;
+        mClassesId.append(idx8);
     }
 }
 
@@ -45,9 +46,14 @@ FeatureImporter::~FeatureImporter()
 	delete [] mData;
 }
 
-const float *FeatureImporter::featuresForItem(const quint32 itemNumber) const
+QVector<nnreal> FeatureImporter::featuresForItem(const quint32 itemNumber) const
 {
-	return mData + itemNumber * mFeatureCount;
+    QVector<nnreal> result;
+    result.reserve(mFeatureCount);
+    for (quint32 i = 0; i < mFeatureCount; i++) {
+        result.append(mData[itemNumber * mFeatureCount + i]);
+    }
+    return result;
 }
 
 const float *FeatureImporter::features() const
@@ -65,12 +71,12 @@ QStringList FeatureImporter::labels() const
 	return mLabels;
 }
 
-qint8 FeatureImporter::classIdForItem(const quint32 itemNumber) const
+quint8 FeatureImporter::classIdForItem(const quint32 itemNumber) const
 {
     return mClassesId.at(itemNumber);
 }
 
-QVector<qint8> FeatureImporter::classesId() const
+QVector<quint8> FeatureImporter::classesId() const
 {
     return mClassesId;
 }

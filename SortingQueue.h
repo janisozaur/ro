@@ -9,11 +9,11 @@ class SortingQueue
 {
 public:
     SortingQueue(const qint8 &size);
-    void tryAdd(const QPair<float, qint8> &element);
-    QVector<QPair<float, qint8> > toVector() const;
+    void tryAdd(const QPair<float, quint8> &element);
+    QVector<QPair<float, quint8> > toVector() const;
 
 private:
-    QLinkedList<QPair<float, qint8> > mList;
+    QLinkedList<QPair<float, quint8> > mList;
     const qint8 mSize;
     float mFarthest;
 };

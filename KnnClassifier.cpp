@@ -17,12 +17,16 @@ KnnClassifier::KnnClassifier(const qint8 &k, const FeatureImporter &trainData) :
     }
 }
 
-qint8 KnnClassifier::classify(const float *testFeatures)
+quint8 KnnClassifier::classify(const QVector<nnreal> &tf)
 {
+    float *testFeatures = new float[tf.size()];
+    for (int i = 0; i < tf.size(); i++) {
+        testFeatures[i] = tf.at(i);
+    }
     const float power = 1.0f / 3.0f;
-    QVector<qint8> result(mKValues.size());
-    qint8 *resultPtr = result.data();
-    QVector<QPair<float, qint8> > distances;
+    QVector<quint8> result(mKValues.size());
+    quint8 *resultPtr = result.data();
+    QVector<QPair<float, quint8> > distances;
     SortingQueue q(mKValues.at(0));
     for (quint32 j = 0; j < mTrainItemCount; j++) {
         float distanceSum = 0;
@@ -56,12 +60,12 @@ qint8 KnnClassifier::classify(const float *testFeatures)
     }
     distances = q.toVector();
     for (int w = 0; w < mKValues.size(); w++) {
-        QHash<qint8, int> occurences;
+        QHash<quint8, int> occurences;
         for (int j = 0; j < mKValues.at(w); j++) {
             occurences[distances.at(j).second] += 1;
         }
         int max = 0;
-        qint8 objectClass = occurences.keys().at(0);
+        quint8 objectClass = occurences.keys().at(0);
         for (int j = 0; j < occurences.size(); j++) {
             if (occurences.values().at(j) > max) {
                 max = occurences.values().at(j);
@@ -71,10 +75,11 @@ qint8 KnnClassifier::classify(const float *testFeatures)
         resultPtr[w] = objectClass;
     }
     mClassificationTemp = result;
+    delete [] testFeatures;
     return result.at(0);
 }
 
-QVector<qint8> KnnClassifier::fullClassification() const
+QVector<quint8> KnnClassifier::fullClassification() const
 {
     return mClassificationTemp;
 }

@@ -5,7 +5,7 @@ SortingQueue::SortingQueue(const qint8 &size) :
 {
 }
 
-void SortingQueue::tryAdd(const QPair<float, qint8> &element)
+void SortingQueue::tryAdd(const QPair<float, quint8> &element)
 {
     if (mList.size() < mSize) {
         if (mList.size() == 0) {
@@ -35,9 +35,9 @@ void SortingQueue::tryAdd(const QPair<float, qint8> &element)
     }
 }
 
-QVector<QPair<float, qint8> > SortingQueue::toVector() const
+QVector<QPair<float, quint8> > SortingQueue::toVector() const
 {
-    QVector<QPair<float, qint8> > result;
+    QVector<QPair<float, quint8> > result;
     result.reserve(mList.size());
     for (auto it = mList.constBegin(); it != mList.constEnd(); it++) {
         result.append(*it);

@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
         ci[i] = new KnnClassifier(k, trainFeatures);
     }
 
-    QVector<qint8> classes(testFeatures.itemCount());
-    qint8 *classesPtr = classes.data();
+    QVector<quint8> classes(testFeatures.itemCount());
+    quint8 *classesPtr = classes.data();
     qDebug() << "starting classification";
     QElapsedTimer timer;
     timer.start();
