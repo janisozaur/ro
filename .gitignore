@@ -1,0 +1,11 @@
+*.pro.user
+*~
+*-build-*
+*.swp
+*.zip
+texture-train2
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
