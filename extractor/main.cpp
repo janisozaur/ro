@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
     outstream.setByteOrder(QDataStream::BigEndian);
     qDebug() << "trainSize:" << trainData.size();
 
+    int size = sizeof(float);
+    outstream << size;
     outstream << extractorName;
     outstream << extractorArgs;
     outstream << extractor->size();
@@ -61,6 +63,6 @@ int main(int argc, char *argv[])
     output.close();
 
     delete extractor;
-    
+
     return 0;
 }
