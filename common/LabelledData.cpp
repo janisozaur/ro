@@ -2,13 +2,13 @@
 
 #include <QDataStream>
 
-LabelledData::LabelledData(const QVector<float> &data, const quint8 &imageClass) :
+LabelledData::LabelledData(const QVector<nnreal> &data, const quint8 &imageClass) :
     mData(data),
     mClass(imageClass)
 {
 }
 
-void LabelledData::setData(const QVector<float> &data)
+void LabelledData::setData(const QVector<nnreal> &data)
 {
     mData = data;
 }
@@ -18,7 +18,7 @@ void LabelledData::setClass(const quint8 &dataClass)
     mClass = dataClass;
 }
 
-QVector<float> LabelledData::data() const
+QVector<nnreal> LabelledData::data() const
 {
     return mData;
 }

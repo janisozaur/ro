@@ -1,5 +1,6 @@
 #include "ExtractorFactory.h"
 #include "../common/LabelledData.h"
+#include "../common/TypeCommon.h"
 
 #include <QtCore/QCoreApplication>
 #include <QDir>
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
         trainData.reserve(trainData.size() + fileList.size());
         for (int i = 0; i < fileList.size(); i++) {
             const QImage image(fileList.at(i).filePath());
-            const QVector<float> res = extractor->extract(image, 32, 32);
+            const QVector<nnreal> res = extractor->extract(image, 32, 32);
             LabelledData li(res, labels.at(j));
             trainData.append(li);
         }
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
     outstream.setByteOrder(QDataStream::BigEndian);
     qDebug() << "trainSize:" << trainData.size();
 
-    int size = sizeof(float);
+    int size = sizeof(nnreal);
     outstream << size;
     outstream << extractorName;
     outstream << extractorArgs;

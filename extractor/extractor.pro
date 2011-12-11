@@ -27,4 +27,5 @@ HEADERS += \
     extractors/FFT.h \
     extractors/ComplexArray.h \
     extractors/Complex.h \
+    ../common/TypeCommon.h \
     ../common/LabelledData.h

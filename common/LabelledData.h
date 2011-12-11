@@ -1,20 +1,22 @@
 #ifndef LABELLEDDATA_H
 #define LABELLEDDATA_H
 
+#include "TypeCommon.h"
+
 #include <QtGlobal>
 #include <QVector>
 
 class LabelledData
 {
 public:
-    LabelledData(const QVector<float> &data = QVector<float>(), const quint8 &dataClass = 0);
-    void setData(const QVector<float> &data);
+    LabelledData(const QVector<nnreal> &data = QVector<nnreal>(), const quint8 &dataClass = 0);
+    void setData(const QVector<nnreal> &data);
     void setClass(const quint8 &dataClass);
-    QVector<float> data() const;
+    QVector<nnreal> data() const;
     quint8 dataClass() const;
 
 private:
-    QVector<float> mData;
+    QVector<nnreal> mData;
     quint8 mClass;
 
     friend QDataStream &operator<< (QDataStream &stream, const LabelledData &li);
