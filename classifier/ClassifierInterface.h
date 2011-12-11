@@ -1,7 +1,7 @@
 #ifndef CLASSIFIERINTERFACE_H
 #define CLASSIFIERINTERFACE_H
 
-#include "NeuralNetwork/NeuralNetworkCommon.h"
+#include "../common/TypeCommon.h"
 
 #include <QStringList>
 

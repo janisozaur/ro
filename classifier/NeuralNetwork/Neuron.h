@@ -1,7 +1,7 @@
 #ifndef NEURON_H
 #define NEURON_H
 
-#include "NeuralNetworkCommon.h"
+#include "../../common/TypeCommon.h"
 
 #include <QVector>
 

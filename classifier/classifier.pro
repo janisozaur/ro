@@ -38,7 +38,7 @@ HEADERS += \
     SortItem.h \
     KnnClassifier.h \
     SortingQueue.h \
-    NeuralNetwork/NeuralNetworkCommon.h \
+    ../common/TypeCommon.h \
     NeuralNetwork/Neuron.h \
     NeuralNetwork/Connection.h \
     NeuralNetwork/NetworkLayer.h \
