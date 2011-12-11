@@ -1,5 +1,6 @@
 #include "FeatureImporter.h"
 #include "KnnClassifier.h"
+#include "NeuralNetwork/NeuralNetwork.h"
 
 #include <QtCore/QCoreApplication>
 #include <QDebug>
@@ -8,6 +9,7 @@
 #include <QHostInfo>
 #include <QTextCodec>
 #include <omp.h>
+#include <QBuffer>
 
 #define PERCENTAGE_CONFUSION
 
@@ -47,8 +49,9 @@ int main(int argc, char *argv[])
     }
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
+    const QStringList classifierArgs = args.mid(3);
     if (classifierName == "knn") {
-        QFile trainFile(args.at(3));
+        QFile trainFile(classifierArgs.at(0));
         if (!trainFile.open(QIODevice::ReadOnly)) {
             qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
         }
@@ -56,8 +59,8 @@ int main(int argc, char *argv[])
         trainFile.close();
         bool ok = true;
         int k = 50;
-        if (args.size() >= 5) {
-            k = qMax(0, args.at(4).toInt(&ok));
+        if (classifierArgs.size() >= 2) {
+            k = qMax(0, classifierArgs.at(1).toInt(&ok));
             qDebug() << "k =" << k;
         } else {
             ok = false;
@@ -69,6 +72,22 @@ int main(int argc, char *argv[])
         qDebug() << "initial k:" << k;
         for (int i = 0; i < threadCount; i++) {
             ci[i] = new KnnClassifier(k, trainFeatures);
+        }
+    } else if (classifierName == "ann") {
+        QFile networkFile(classifierArgs.at(0));
+        if (!networkFile.open(QIODevice::ReadOnly)) {
+            qFatal("Failed to open network file %s.\n", networkFile.fileName().toStdString().c_str());
+        }
+        QByteArray qba = networkFile.readAll();
+        networkFile.close();
+        for (int i = 0; i < threadCount; i++) {
+            QBuffer buf(&qba);
+            buf.open(QIODevice::ReadOnly);
+            NeuralNetwork *nn = new NeuralNetwork();
+            QDataStream ds(&buf);
+            ds >> *nn;
+            buf.close();
+            ci[i] = nn;
         }
     } else {
         qCritical() << "unrecognised classifier:" << classifierName;
