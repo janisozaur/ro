@@ -16,7 +16,8 @@ TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS += -fopenmp
-QMAKE_CXXFLAGS += -mtune=core2 -march=core2 -O3 -ftree-vectorizer-verbose=2 -msse -msse2 -mssse3 -mmmx
+QMAKE_CXXFLAGS += -mtune=core2 -march=core2 -O3 -msse -msse2 -mssse3 -mmmx
+#QMAKE_CXXFLAGS += -ftree-vectorizer-verbose=2
 
 LIBS += -lgomp
 
@@ -25,7 +26,11 @@ SOURCES += main.cpp \
     FeatureImporter.cpp \
     SortItem.cpp \
     KnnClassifier.cpp \
-    SortingQueue.cpp
+    SortingQueue.cpp \
+    NeuralNetwork/Neuron.cpp \
+    NeuralNetwork/Connection.cpp \
+    NeuralNetwork/NetworkLayer.cpp \
+    NeuralNetwork/NeuralNetwork.cpp
 
 HEADERS += \
     ClassifierInterface.h \
@@ -33,4 +38,8 @@ HEADERS += \
     SortItem.h \
     KnnClassifier.h \
     SortingQueue.h \
-    NeuralNetwork/NeuralNetworkCommon.h
+    NeuralNetwork/NeuralNetworkCommon.h \
+    NeuralNetwork/Neuron.h \
+    NeuralNetwork/Connection.h \
+    NeuralNetwork/NetworkLayer.h \
+    NeuralNetwork/NeuralNetwork.h

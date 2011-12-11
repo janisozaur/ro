@@ -1,6 +1,6 @@
 #ifndef NEURALNETWORKCOMMON_H
 #define NEURALNETWORKCOMMON_H
 
-typedef double nnreal;
+typedef float nnreal;
 
 #endif // NEURALNETWORKCOMMON_H
