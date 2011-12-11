@@ -101,7 +101,10 @@ int main(int argc, char *argv[])
         }
     }
     int msecs = timer.elapsed();
-    delete ci;
+    for (int i = 0; i < threadCount; i++) {
+        delete ci[i];
+    }
+    delete [] ci;
     qDebug() << "calculations took" << msecs << "msecs";
 
     quint32 correctCount = 0;
