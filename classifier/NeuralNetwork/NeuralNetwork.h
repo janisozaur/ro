@@ -1,6 +1,7 @@
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
 
+#include "../ClassifierInterface.h"
 #include "../../common/TypeCommon.h"
 #include "Neuron.h"
 
@@ -8,7 +9,7 @@
 
 class NetworkLayer;
 
-class NeuralNetwork
+class NeuralNetwork : public ClassifierInterface
 {
 public:
     NeuralNetwork();
