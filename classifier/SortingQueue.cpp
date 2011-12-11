@@ -13,7 +13,7 @@ void SortingQueue::tryAdd(const QPair<float, quint8> &element)
             return;
         } else {
             auto it = mList.begin();
-            for(; it != mList.end(); ++it) {
+            for (; it != mList.end(); ++it) {
                 if (element < (*it)) {
                     mList.insert(it, element);
                     return;
