@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core network
-
-QT       -= gui
+QT       += core network gui
 
 TARGET = classifier
 CONFIG   += console
