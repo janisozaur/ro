@@ -33,46 +33,10 @@ int main(int argc, char *argv[])
     if (!testFile.open(QIODevice::ReadOnly)) {
         qFatal("Failed to open test file %s.\n", testFile.fileName().toStdString().c_str());
     }
-    QFile trainFile(args.at(2));
-    if (!trainFile.open(QIODevice::ReadOnly)) {
-        qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
-    }
-
-    QElapsedTimer loadTimer;
-    loadTimer.start();
-    FeatureImporter trainFeatures;
-    FeatureImporter testFeatures;
-#pragma omp sections
-    {
-#pragma omp section
-        {
-            trainFeatures.open(&trainFile);
-        }
-#pragma omp section
-        {
-            testFeatures.open(&testFile);
-        }
-    }
-    int loadMsecs = loadTimer.elapsed();
-    qDebug() << "loading took" << loadMsecs << "msecs";
-
-    trainFile.close();
+    FeatureImporter testFeatures(&testFile);
     testFile.close();
 
-    bool ok = true;
-    int k = 50;
-    if (args.size() >= 4) {
-        k = qMax(0, args.at(3).toInt(&ok));
-        qDebug() << "k =" << k;
-    } else {
-        ok = false;
-    }
-    if (!ok) {
-        qDebug() << "no k given, assuming k = 50";
-        k = 50;
-    }
-    qDebug() << "initial k:" << k;
-
+    const QString classifierName = args.at(2);
     int threadCount;
 #pragma omp parallel
     {
@@ -83,8 +47,32 @@ int main(int argc, char *argv[])
     }
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
-    for (int i = 0; i < threadCount; i++) {
-        ci[i] = new KnnClassifier(k, trainFeatures);
+    if (classifierName == "knn") {
+        QFile trainFile(args.at(3));
+        if (!trainFile.open(QIODevice::ReadOnly)) {
+            qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
+        }
+        FeatureImporter trainFeatures(&trainFile);
+        trainFile.close();
+        bool ok = true;
+        int k = 50;
+        if (args.size() >= 5) {
+            k = qMax(0, args.at(4).toInt(&ok));
+            qDebug() << "k =" << k;
+        } else {
+            ok = false;
+        }
+        if (!ok) {
+            qDebug() << "no k given, assuming k = 50";
+            k = 50;
+        }
+        qDebug() << "initial k:" << k;
+        for (int i = 0; i < threadCount; i++) {
+            ci[i] = new KnnClassifier(k, trainFeatures);
+        }
+    } else {
+        qCritical() << "unrecognised classifier:" << classifierName;
+        return -1;
     }
 
     QVector<quint8> classes(testFeatures.itemCount());
