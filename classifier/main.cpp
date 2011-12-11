@@ -20,23 +20,23 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-	QStringList args = a.arguments();
-	if (args.size() < 3) {
-		QStringList usage;
-		usage << args.at(0)
-			  << "[train data]"
-			  << "[test data]";
-		qFatal("Too few arguments. Usage:\n%s\n", usage.join(" ").toStdString().c_str());
-	}
+    QStringList args = a.arguments();
+    if (args.size() < 3) {
+        QStringList usage;
+        usage << args.at(0)
+              << "[train data]"
+              << "[test data]";
+        qFatal("Too few arguments. Usage:\n%s\n", usage.join(" ").toStdString().c_str());
+    }
 
-	QFile trainFile(args.at(1));
-	if (!trainFile.open(QIODevice::ReadOnly)) {
-		qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
-	}
-	QFile testFile(args.at(2));
-	if (!testFile.open(QIODevice::ReadOnly)) {
-		qFatal("Failed to open test file %s.\n", testFile.fileName().toStdString().c_str());
-	}
+    QFile testFile(args.at(1));
+    if (!testFile.open(QIODevice::ReadOnly)) {
+        qFatal("Failed to open test file %s.\n", testFile.fileName().toStdString().c_str());
+    }
+    QFile trainFile(args.at(2));
+    if (!trainFile.open(QIODevice::ReadOnly)) {
+        qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
+    }
 
     QElapsedTimer loadTimer;
     loadTimer.start();
@@ -53,12 +53,11 @@ int main(int argc, char *argv[])
             testFeatures.open(&testFile);
         }
     }
-    testFeatures.synchronizeClassId(trainFeatures);
     int loadMsecs = loadTimer.elapsed();
     qDebug() << "loading took" << loadMsecs << "msecs";
 
-	trainFile.close();
-	testFile.close();
+    trainFile.close();
+    testFile.close();
 
     bool ok = true;
     int k = 50;
@@ -83,6 +82,7 @@ int main(int argc, char *argv[])
         }
     }
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
+
     for (int i = 0; i < threadCount; i++) {
         ci[i] = new KnnClassifier(k, trainFeatures);
     }
@@ -100,12 +100,11 @@ int main(int argc, char *argv[])
             classesPtr[i] = ci[threadNum]->classify(testFeatures.featuresForItem(i));
         }
     }
-	int msecs = timer.elapsed();
+    int msecs = timer.elapsed();
     delete ci;
     qDebug() << "calculations took" << msecs << "msecs";
 
     quint32 correctCount = 0;
-    qDebug() << "sizes:" << classes.size() << testFeatures.classesId().size();
     for (quint32 i = 0; i < quint32(classes.size()); i++) {
         if (classes.at(i) == testFeatures.classIdForItem(i)) {
             correctCount++;
@@ -204,5 +203,5 @@ int main(int argc, char *argv[])
 //    gnuplotFile.close();
 //    msecs = timer.elapsed();
 //    qDebug() << "everything took" << msecs << "msecs";
-	return 0;
+    return 0;
 }

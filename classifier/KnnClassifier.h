@@ -3,6 +3,7 @@
 
 #include "ClassifierInterface.h"
 #include "FeatureImporter.h"
+#include "../common/TypeCommon.h"
 
 class KnnClassifier : public ClassifierInterface
 {
@@ -13,12 +14,11 @@ public:
 
 private:
     const FeatureImporter mTrainData;
-    const float *mTrainFeatures;
+    const nnreal *mTrainFeatures;
     QVector<quint8> mClassificationTemp;
     QList<qint8> mKValues;
     const quint32 mTrainItemCount;
     const quint32 mFeaturesPerItem;
-    const quint8 *mTrainClasses;
 };
 
 #endif // KNNCLASSIFIER_H

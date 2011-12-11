@@ -1,7 +1,8 @@
 #ifndef FEATUREIMPORTER_H
 #define FEATUREIMPORTER_H
 
-#include "NeuralNetwork/NeuralNetworkCommon.h"
+#include "../common/TypeCommon.h"
+#include "../common/LabelledData.h"
 
 #include <QByteArray>
 #include <QStringList>
@@ -13,29 +14,24 @@ class FeatureImporter
 {
 public:
     FeatureImporter();
-	FeatureImporter(QIODevice *data);
+    FeatureImporter(QIODevice *data);
     ~FeatureImporter();
     QVector<nnreal> featuresForItem(const quint32 itemNumber) const;
-	const float *features() const;
-	QString labelForItem(const quint32 itemNumber) const;
-	QStringList labels() const;
     quint8 classIdForItem(const quint32 itemNumber) const;
     QVector<quint8> classesId() const;
-    void synchronizeClassId(const FeatureImporter &other);
-	quint32 featuresPerItem() const;
-	quint32 itemCount() const;
-	QString name() const;
+    quint32 featuresPerItem() const;
+    quint32 itemCount() const;
+    QString name() const;
+    QStringList args() const;
     void open(QIODevice *data);
+    const nnreal *features()const;
 
 private:
-	float *mData;
-	QStringList mLabels;
-	quint32 mItemCount;
-	quint32 mFeatureCount;
-	QString mName;
-    QVector<QString> mClassesHash;
-    QVector<quint8> mClassesId;
-
+    QString mExtractorName;
+    QStringList mExtractorArgs;
+    quint32 mFeatureCount;
+    QVector<LabelledData> mItems;
+    QVector<nnreal> mFeatures;
 };
 
 #endif // FEATUREIMPORTER_H

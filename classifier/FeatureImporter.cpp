@@ -5,8 +5,7 @@
 
 #include <QDebug>
 
-FeatureImporter::FeatureImporter() :
-    mData(NULL)
+FeatureImporter::FeatureImporter()
 {
 }
 
@@ -17,93 +16,57 @@ FeatureImporter::FeatureImporter(QIODevice *data)
 
 void FeatureImporter::open(QIODevice *data)
 {
-    QTextStream stream(data);
-    mName = stream.readLine();
-    stream >> mItemCount;
+    QDataStream stream(data);
+    stream.setVersion(QDataStream::Qt_4_6);
+    stream.setByteOrder(QDataStream::BigEndian);
+    int size;
+    stream >> size;
+    Q_ASSERT(size == sizeof(nnreal));
+    stream >> mExtractorName;
+    stream >> mExtractorArgs;
     stream >> mFeatureCount;
-    mData = new float[mItemCount * mFeatureCount];
-    mLabels.reserve(mItemCount);
-
-    for (unsigned int i = 0; i < mItemCount; i++) {
-        QString label;
-        stream >> label;
-        for (unsigned int j = 0; j < mFeatureCount; j++) {
-            stream >> mData[i * mFeatureCount + j];
-        }
-        mLabels << label;
-        qint16 index = mClassesHash.indexOf(label);
-        if (index == -1) {
-            mClassesHash.append(label);
-            index = mClassesHash.size() - 1;
-        }
-        quint8 idx8 = index;
-        mClassesId.append(idx8);
+    stream >> mItems;
+    mFeatures.reserve(mItems.size() * mFeatureCount);
+    for (int i = 0; i < mItems.size(); i++) {
+        mFeatures << mItems.at(i).data();
     }
 }
 
 FeatureImporter::~FeatureImporter()
 {
-	delete [] mData;
 }
 
 QVector<nnreal> FeatureImporter::featuresForItem(const quint32 itemNumber) const
 {
-    QVector<nnreal> result;
-    result.reserve(mFeatureCount);
-    for (quint32 i = 0; i < mFeatureCount; i++) {
-        result.append(mData[itemNumber * mFeatureCount + i]);
-    }
-    return result;
-}
-
-const float *FeatureImporter::features() const
-{
-	return mData;
-}
-
-QString FeatureImporter::labelForItem(const quint32 itemNumber) const
-{
-	return mLabels.at(itemNumber);
-}
-
-QStringList FeatureImporter::labels() const
-{
-	return mLabels;
+    return mItems.at(itemNumber).data();
 }
 
 quint8 FeatureImporter::classIdForItem(const quint32 itemNumber) const
 {
-    return mClassesId.at(itemNumber);
-}
-
-QVector<quint8> FeatureImporter::classesId() const
-{
-    return mClassesId;
-}
-
-void FeatureImporter::synchronizeClassId(const FeatureImporter &other)
-{
-    for (int i = 0; i < mClassesId.size(); i++) {
-        qint8 newId = other.mClassesHash.indexOf(mLabels.at(i));
-        if (newId == -1) {
-            qCritical() << "there is no id for class" << mLabels.at(i);
-        }
-        mClassesId[i] = newId;
-    }
-    mClassesHash = other.mClassesHash;
+    return mItems.at(itemNumber).dataClass();
 }
 
 quint32 FeatureImporter::featuresPerItem() const
 {
-	return mFeatureCount;
+    return mFeatureCount;
 }
 
 quint32 FeatureImporter::itemCount() const
 {
-	return mItemCount;
+    return mItems.size();
 }
 
 QString FeatureImporter::name() const
 {
-	return mName;
+    return mExtractorName;
+}
+
+QStringList FeatureImporter::args() const
+{
+    return mExtractorArgs;
+}
+
+const nnreal *FeatureImporter::features() const
+{
+    return mFeatures.constData();
 }

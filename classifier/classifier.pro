@@ -30,7 +30,8 @@ SOURCES += main.cpp \
     NeuralNetwork/Neuron.cpp \
     NeuralNetwork/Connection.cpp \
     NeuralNetwork/NetworkLayer.cpp \
-    NeuralNetwork/NeuralNetwork.cpp
+    NeuralNetwork/NeuralNetwork.cpp \
+    ../common/LabelledData.cpp
 
 HEADERS += \
     ClassifierInterface.h \
@@ -42,4 +43,5 @@ HEADERS += \
     NeuralNetwork/Neuron.h \
     NeuralNetwork/Connection.h \
     NeuralNetwork/NetworkLayer.h \
-    NeuralNetwork/NeuralNetwork.h
+    NeuralNetwork/NeuralNetwork.h \
+    ../common/LabelledData.h

@@ -10,7 +10,7 @@
 
 KnnClassifier::KnnClassifier(const qint8 &k, const FeatureImporter &trainData) :
     mTrainData(trainData), mTrainFeatures(trainData.features()), mTrainItemCount(trainData.itemCount()),
-    mFeaturesPerItem(trainData.featuresPerItem()), mTrainClasses(trainData.classesId().data())
+    mFeaturesPerItem(trainData.featuresPerItem())
 {
     for (qint8 i = k; i > 0; i--) {
         mKValues.append(i);
@@ -56,7 +56,7 @@ quint8 KnnClassifier::classify(const QVector<nnreal> &tf)
 #endif
         }
         distanceSum = pow(distanceSum, power);
-        q.tryAdd(qMakePair(distanceSum, mTrainClasses[j]));
+        q.tryAdd(qMakePair(distanceSum, mTrainData.classIdForItem(j)));
     }
     distances = q.toVector();
     for (int w = 0; w < mKValues.size(); w++) {
