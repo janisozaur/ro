@@ -4,6 +4,7 @@
 
 #include <QtCore/QCoreApplication>
 #include <QDir>
+#include <QElapsedTimer>
 
 #include <QDebug>
 
@@ -38,20 +39,27 @@ int main(int argc, char *argv[])
     QStringList subdirs = QStringList() << "wood" << "straw" << "salt" << "linen";
     QList<quint8> labels = QList<quint8>() << 32 << 96 << 160 << 224;
     QVector<LabelledData> trainData;
+    unsigned int count = 0;
     for (int j = 0; j < subdirs.size(); j++) {
         d.cd(subdirs.at(j));
         const QFileInfoList fileList = d.entryInfoList(QStringList() << "*.png");
-        trainData.reserve(trainData.size() + fileList.size());
+        QElapsedTimer extractorTimer;
+        extractorTimer.start();
         for (int i = 0; i < fileList.size(); i++) {
             const QImage image(fileList.at(i).filePath());
+            trainData.resize(trainData.size() + image.width() * image.height());
+            LabelledData *trainDataPtr = trainData.data();
+#pragma omp parallel for
             for (int x = 0; x < image.width(); x++) {
                 for (int y = 0; y < image.height(); y++) {
                     const QVector<nnreal> res = extractor->extract(image, x, y);
                     LabelledData li(res, labels.at(j));
-                    trainData.append(li);
+                    const unsigned int idx = count + x * image.height() + y;
+                    trainDataPtr[idx] = li;
                 }
             }
-            qDebug() << fileList.at(i).filePath();
+            count += image.width() * image.height();
+            qDebug() << fileList.at(i).filePath() << extractorTimer.restart();
         }
         d.cdUp();
     }
