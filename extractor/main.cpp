@@ -44,9 +44,14 @@ int main(int argc, char *argv[])
         trainData.reserve(trainData.size() + fileList.size());
         for (int i = 0; i < fileList.size(); i++) {
             const QImage image(fileList.at(i).filePath());
-            const QVector<nnreal> res = extractor->extract(image, 32, 32);
-            LabelledData li(res, labels.at(j));
-            trainData.append(li);
+            for (int x = 0; x < image.width(); x++) {
+                for (int y = 0; y < image.height(); y++) {
+                    const QVector<nnreal> res = extractor->extract(image, x, y);
+                    LabelledData li(res, labels.at(j));
+                    trainData.append(li);
+                }
+            }
+            qDebug() << fileList.at(i).filePath();
         }
         d.cdUp();
     }
