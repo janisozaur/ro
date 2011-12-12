@@ -5,41 +5,46 @@
 
 class QDebug;
 
+struct vec2D {
+    float x;
+    float y;
+};
+
 class Complex
 {
 public:
     Complex();
     Complex(const Complex &other);
-    Complex(const qreal &real, const qreal &imaginary);
+    Complex(const float &real, const float &imaginary);
 
-    static Complex fromPowerPhase(const qreal &power, const qreal &phase);
+    static Complex fromPowerPhase(const float &power, const float &phase);
 
-    qreal abs() const;
-    qreal real() const;
-    qreal imaginary() const;
-    qreal phase() const;
-    void setReal(const qreal &real);
-    void setImaginary(const qreal &imaginary);
+    float abs() const;
+    float real() const;
+    float imaginary() const;
+    float phase() const;
+    void setReal(const float &real);
+    void setImaginary(const float &imaginary);
 
     Complex &operator =(const Complex &rhs);
     Complex &operator+=(const Complex &rhs);
     Complex &operator-=(const Complex &rhs);
     Complex &operator*=(const Complex &rhs);
-    Complex &operator*=(const qreal &rhs);
+    Complex &operator*=(const float &rhs);
     Complex &operator/=(const Complex &rhs);
-    Complex &operator/=(const qreal &rhs);
+    Complex &operator/=(const float &rhs);
     const Complex operator +(const Complex &rhs) const;
     const Complex operator -(const Complex &rhs) const;
     const Complex operator *(const Complex &rhs) const;
-    const Complex operator *(const qreal &rhs) const;
+    const Complex operator *(const float &rhs) const;
     const Complex operator /(const Complex &rhs) const;
-    const Complex operator /(const qreal &rhs) const;
+    const Complex operator /(const float &rhs) const;
     bool operator==(const Complex &rhs) const;
     bool operator!=(const Complex &rhs) const;
     friend QDebug operator<<(QDebug &stream, const Complex &rhs);
 
 private:
-    QVector2D mNumber;
+    vec2D mNumber;
 };
 
 #endif // COMPLEX_H

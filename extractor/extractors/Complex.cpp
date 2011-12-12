@@ -16,46 +16,47 @@ Complex::Complex(const Complex &other)
     this->mNumber = other.mNumber;
 }
 
-Complex::Complex(const qreal &real, const qreal &imaginary) :
-    mNumber(QVector2D(real, imaginary))
+Complex::Complex(const float &real, const float &imaginary) :
+    mNumber({real, imaginary})
 {
 }
 
-Complex Complex::fromPowerPhase(const qreal &power, const qreal &phase)
+Complex Complex::fromPowerPhase(const float &power, const float &phase)
 {
     return Complex(power * cos(phase), power * sin(phase));
 }
 
-qreal Complex::abs() const
+float Complex::abs() const
 {
-    return mNumber.length();
+
+    return std::sqrt(mNumber.x * mNumber.x + mNumber.y * mNumber.y);
 }
 
-qreal Complex::phase() const
+float Complex::phase() const
 {
     // http://en.wikipedia.org/wiki/Atan2
-    qreal result = atan2(imaginary(), real());
+    float result = atan2(imaginary(), real());
     return result;
 }
 
-qreal Complex::real() const
+float Complex::real() const
 {
-    return mNumber.x();
+    return mNumber.x;
 }
 
-qreal Complex::imaginary() const
+float Complex::imaginary() const
 {
-    return mNumber.y();
+    return mNumber.y;
 }
 
-void Complex::setReal(const qreal &real)
+void Complex::setReal(const float &real)
 {
-    mNumber.setX(real);
+    mNumber.x = (real);
 }
 
-void Complex::setImaginary(const qreal &imaginary)
+void Complex::setImaginary(const float &imaginary)
 {
-    mNumber.setY(imaginary);
+    mNumber.y = (imaginary);
 }
 
 Complex &Complex::operator =(const Complex &rhs)
@@ -67,47 +68,51 @@ Complex &Complex::operator =(const Complex &rhs)
 
 Complex &Complex::operator+=(const Complex &rhs)
 {
-    this->mNumber += rhs.mNumber;
+    this->mNumber.x += rhs.mNumber.x;
+    this->mNumber.y += rhs.mNumber.y;
     return *this;
 }
 
 Complex &Complex::operator-=(const Complex &rhs)
 {
-    this->mNumber -= rhs.mNumber;
+    this->mNumber.x -= rhs.mNumber.x;
+    this->mNumber.y -= rhs.mNumber.y;
     return *this;
 }
 
 Complex &Complex::operator*=(const Complex &rhs)
 {
     // http://en.wikipedia.org/wiki/Complex_number#Multiplication_and_division
-    QVector2D result;
-    result.setX(real() * rhs.real() - imaginary() * rhs.imaginary());
-    result.setY(imaginary() * rhs.real() + real() * rhs.imaginary());
+    vec2D result;
+    result.x = (real() * rhs.real() - imaginary() * rhs.imaginary());
+    result.y = (imaginary() * rhs.real() + real() * rhs.imaginary());
     this->mNumber = result;
     return *this;
 }
 
-Complex &Complex::operator*=(const qreal &rhs)
+Complex &Complex::operator*=(const float &rhs)
 {
-    this->mNumber *= rhs;
+    this->mNumber.x *= rhs;
+    this->mNumber.y *= rhs;
     return *this;
 }
 
 Complex &Complex::operator/=(const Complex &rhs)
 {
     // http://en.wikipedia.org/wiki/Complex_number#Multiplication_and_division
-    QVector2D result;
-    result.setX((real() * rhs.real() + imaginary() * rhs.imaginary()) /
+    vec2D result;
+    result.x = ((real() * rhs.real() + imaginary() * rhs.imaginary()) /
                 (rhs.real() * rhs.real() + rhs.imaginary() * rhs.imaginary()));
-    result.setY((imaginary() * rhs.real() - real() * rhs.imaginary()) /
+    result.y = ((imaginary() * rhs.real() - real() * rhs.imaginary()) /
                 (rhs.real() * rhs.real() + rhs.imaginary() * rhs.imaginary()));
     this->mNumber = result;
     return *this;
 }
 
-Complex &Complex::operator/=(const qreal &rhs)
+Complex &Complex::operator/=(const float &rhs)
 {
-    this->mNumber /= rhs;
+    this->mNumber.x /= rhs;
+    this->mNumber.y /= rhs;
     return *this;
 }
 
@@ -126,7 +131,7 @@ const Complex Complex::operator *(const Complex &rhs) const
     return Complex(*this) *= rhs;
 }
 
-const Complex Complex::operator *(const qreal &rhs) const
+const Complex Complex::operator *(const float &rhs) const
 {
     return Complex(*this) *= rhs;
 }
@@ -136,23 +141,23 @@ const Complex Complex::operator /(const Complex &rhs) const
     return Complex(*this) /= rhs;
 }
 
-const Complex Complex::operator /(const qreal &rhs) const
+const Complex Complex::operator /(const float &rhs) const
 {
     return Complex(*this) /= rhs;
 }
 
 bool Complex::operator ==(const Complex &rhs) const
 {
-    return this->mNumber == rhs.mNumber;
+    return (this->mNumber.x == rhs.mNumber.x && this->mNumber.y == rhs.mNumber.y);
 }
 
 bool Complex::operator !=(const Complex &rhs) const
 {
-    return this->mNumber != rhs.mNumber;
+    return (this->mNumber.x != rhs.mNumber.x || this->mNumber.y != rhs.mNumber.y);
 }
 
 QDebug operator <<(QDebug &stream, const Complex &rhs)
 {
-    stream << "Complex(" << rhs.mNumber.x() << "," << rhs.mNumber.y() << ")";
+    stream << "Complex(" << rhs.mNumber.x << "," << rhs.mNumber.y << ")";
     return stream.nospace();
 }
