@@ -1,13 +1,13 @@
 #include "NeuralNetwork.h"
 #include "NetworkLayer.h"
 #include "Connection.h"
+#include "../../common/TypeCommon.h"
 
-#include <math.h>
-#include <fstream>
+#include <cmath>
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
-#include <climits>
+#include <limits>
 
 NeuralNetwork::NeuralNetwork()
 {

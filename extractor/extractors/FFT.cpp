@@ -67,11 +67,11 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
     }
     perform(ca);
 
-    qreal minm = 0;
-    qreal maxm = 0;
+    float minm = 0;
+    float maxm = 0;
     for (unsigned int j = 0; j < ca->shape()[0]; j++) {
         for (unsigned int k = 0; k < ca->shape()[1]; k++) {
-            qreal magnitude = (*ca)[j][k].abs();
+            float magnitude = (*ca)[j][k].abs();
             if (magnitude > maxm) {
                 maxm = magnitude;
             } else if (magnitude < minm) {
@@ -80,17 +80,17 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
         }
     }
 
-    qreal c = 255.0 / log(1.0 + abs(maxm - minm));
+    float c = 255.0 / log(1.0 + abs(maxm - minm));
     QVector<float> result;
     const int maxR = mSize.width() / 2;
     result.reserve(maxR);
     for (int r = 1; r < maxR; r++) {
         int count = 0;
-        qreal sum = 0;
+        float sum = 0;
         for (int i = 0; i < 360; i += 5) {
             const int x = r * cos(i) + maxR;
             const int y = r * sin(i) + maxR;
-            qreal p = (*ca)[x][y].abs();
+            float p = (*ca)[x][y].abs();
             p = c * log(1.0 + p);
             sum += p;
             count++;
@@ -173,11 +173,11 @@ void FFT::perform(ComplexArray *ca, bool inverse) const
 void FFT::transform(QVector<Complex> &elements, bool inverse) const
 {
     const unsigned int N = elements.count();
-    const qreal pi = inverse ? M_PI : -M_PI;
+    const float pi = inverse ? M_PI : -M_PI;
     for (unsigned int step = 1; step < N; step <<= 1) {
         const unsigned int jump = step << 1;
-        const qreal delta = pi / qreal(step);
-        const qreal sine = sin(delta * .5);
+        const float delta = pi / float(step);
+        const float sine = sin(delta * .5);
         const Complex multiplier(-2. * sine * sine, sin(delta));
         Complex factor(1, 0);
 
@@ -192,7 +192,7 @@ void FFT::transform(QVector<Complex> &elements, bool inverse) const
         }
     }
     if (inverse) {
-        qreal scale = 1.0 / elements.size();
+        const float scale = 1.0 / elements.size();
         for (int i = 0; i < elements.size(); i++) {
             elements[i] *= scale;
         }
