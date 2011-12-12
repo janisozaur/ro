@@ -97,6 +97,7 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
         }
         result.append(sum / count);
     }
+    delete ca;
 
     return result;
 }
