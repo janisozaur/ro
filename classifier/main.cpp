@@ -10,6 +10,7 @@
 #include <QTextCodec>
 #include <omp.h>
 #include <QBuffer>
+#include <QImage>
 
 #define PERCENTAGE_CONFUSION
 
@@ -38,7 +39,29 @@ int main(int argc, char *argv[])
     FeatureImporter testFeatures(&testFile);
     testFile.close();
 
-    const QString classifierName = args.at(2);
+    QSize size;
+    {
+        bool ok;
+        const int width = args.at(2).toInt(&ok);
+        if (!ok) {
+            const int argNum = 2;
+            qCritical() << "failed to parse arg" << argNum << ":"
+                        << args.at(argNum) << "as int";
+            return -1;
+        }
+        const int height = args.at(3).toInt(&ok);
+        if (!ok) {
+            const int argNum = 3;
+            qCritical() << "failed to parse arg" << argNum << ":"
+                        << args.at(argNum) << "as int";
+            return -1;
+        }
+        size = QSize(width, height);
+    }
+
+    QImage resultImg(size, QImage::Format_RGB32);
+    const QString imageName(args.at(4));
+
     int threadCount;
 #pragma omp parallel
     {
@@ -49,7 +72,8 @@ int main(int argc, char *argv[])
     }
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
-    const QStringList classifierArgs = args.mid(3);
+    const QString classifierName = args.at(5);
+    const QStringList classifierArgs = args.mid(6);
     if (classifierName == "knn") {
         QFile trainFile(classifierArgs.at(0));
         if (!trainFile.open(QIODevice::ReadOnly)) {
@@ -116,11 +140,16 @@ int main(int argc, char *argv[])
 
     quint32 correctCount = 0;
     for (quint32 i = 0; i < quint32(classes.size()); i++) {
-        if (classes.at(i) == testFeatures.classIdForItem(i)) {
+        const int c = classes.at(i);
+        if (c == testFeatures.classIdForItem(i)) {
             correctCount++;
         }
+        const int x = i % size.width();
+        const int y = i / size.width();
+        resultImg.setPixel(x, y, qRgb(c, c, c));
     }
     qDebug() << "correctness:" << float(correctCount) / float(testFeatures.itemCount()) * 100;
+    resultImg.save(imageName + ".png");
 
 //    QString filenameBase("gnuplot_%1_%2_%3_%4.dat");
 //    QString hostname(QHostInfo::localHostName());
