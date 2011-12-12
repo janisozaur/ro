@@ -51,31 +51,27 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
         qCritical("Image is not greyscale!");
     }
 
-    int layers = 1;
-
     // the array created here might be bigger than image size - it has to be
     // a square of side length 2^n
     const int w = mSize.width();
     const int h = mSize.height();
-    ComplexArray *ca = new ComplexArray(boost::extents[layers][w][h]);
+    ComplexArray *ca = new ComplexArray(boost::extents[w][h]);
 
     // fill only the data that exists in the image
-    for (int i = 0; i < layers; i++) {
-        for (int ay = 0; ay < mSize.height(); ay++) {
-            for (int ax = 0; ax < mSize.width(); ax++) {
-                const int px = ((x - mSize.width() / 2 + ax) + data.width()) % data.width();
-                const int py = ((y - mSize.height() / 2 + ay) + data.height()) % data.height();
-                (*ca)[i][ay][ax] = Complex(data.pixelIndex(px, py), 0);
-            }
+    for (int ay = 0; ay < mSize.height(); ay++) {
+        for (int ax = 0; ax < mSize.width(); ax++) {
+            const int px = ((x - mSize.width() / 2 + ax) + data.width()) % data.width();
+            const int py = ((y - mSize.height() / 2 + ay) + data.height()) % data.height();
+            (*ca)[ay][ax] = Complex(data.pixelIndex(px, py), 0);
         }
     }
     perform(ca);
 
     qreal minm = 0;
     qreal maxm = 0;
-    for (unsigned int j = 0; j < ca->shape()[1]; j++) {
-        for (unsigned int k = 0; k < ca->shape()[2]; k++) {
-            qreal magnitude = (*ca)[0][j][k].abs();
+    for (unsigned int j = 0; j < ca->shape()[0]; j++) {
+        for (unsigned int k = 0; k < ca->shape()[1]; k++) {
+            qreal magnitude = (*ca)[j][k].abs();
             if (magnitude > maxm) {
                 maxm = magnitude;
             } else if (magnitude < minm) {
@@ -94,7 +90,7 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
         for (int i = 0; i < 360; i += 5) {
             const int x = r * cos(i) + maxR;
             const int y = r * sin(i) + maxR;
-            qreal p = (*ca)[0][x][y].abs();
+            qreal p = (*ca)[x][y].abs();
             p = c * log(1.0 + p);
             sum += p;
             count++;
@@ -135,45 +131,43 @@ void FFT::rearrange(QVector<Complex> &elements) const
     }
 }
 
-void FFT::oneDFftH(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse) const
+void FFT::oneDFftH(ComplexArray *ca, int idx1, int idx2, bool inverse) const
 {
     for (unsigned int j = 0; j < ca->shape()[idx2]; j++) {
         QVector<Complex> elements;
         elements.reserve(ca->shape()[idx1]);
         for (unsigned int k = 0; k < ca->shape()[idx1]; k++) {
-            elements << (*ca)[idx][k][j];
+            elements << (*ca)[k][j];
         }
         rearrange(elements);
         transform(elements, inverse);
         for (unsigned int k = 0; k < ca->shape()[idx1]; k++) {
-            (*ca)[idx][k][j] = elements.at(k);
+            (*ca)[k][j] = elements.at(k);
         }
     }
 }
 
-void FFT::oneDFftV(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse) const
+void FFT::oneDFftV(ComplexArray *ca, int idx1, int idx2, bool inverse) const
 {
     for (unsigned int j = 0; j < ca->shape()[idx2]; j++) {
         QVector<Complex> elements;
         elements.reserve(ca->shape()[idx1]);
         for (unsigned int k = 0; k < ca->shape()[idx1]; k++) {
-            elements << (*ca)[idx][j][k];
+            elements << (*ca)[j][k];
         }
         rearrange(elements);
         transform(elements, inverse);
         for (unsigned int k = 0; k < ca->shape()[idx1]; k++) {
-            (*ca)[idx][j][k] = elements.at(k);
+            (*ca)[j][k] = elements.at(k);
         }
     }
 }
 
 void FFT::perform(ComplexArray *ca, bool inverse) const
 {
-    Q_ASSERT(ca->num_dimensions() == 3);
-    for (unsigned int i = 0; i < ca->shape()[0]; i++) {
-        oneDFftH(ca, i, 1, 2, inverse);
-        oneDFftV(ca, i, 2, 1, inverse);
-    }
+    Q_ASSERT(ca->num_dimensions() == 2);
+    oneDFftH(ca, 0, 1, inverse);
+    oneDFftV(ca, 1, 0, inverse);
 }
 
 void FFT::transform(QVector<Complex> &elements, bool inverse) const

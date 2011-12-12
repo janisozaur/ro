@@ -22,8 +22,8 @@ public:
 private:
     void rearrange(QVector<Complex> &elements) const;
     void transform(QVector<Complex> &elements, bool inverse) const;
-    void oneDFftH(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse) const;
-    void oneDFftV(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse) const;
+    void oneDFftH(ComplexArray *ca, int idx1, int idx2, bool inverse) const;
+    void oneDFftV(ComplexArray *ca, int idx1, int idx2, bool inverse) const;
 
     QSize mSize;
 };

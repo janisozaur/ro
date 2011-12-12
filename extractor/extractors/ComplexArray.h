@@ -10,7 +10,7 @@
  * for Boost.MultiArray
  */
 
-typedef boost::multi_array<Complex, 3> ComplexArray;
+typedef boost::multi_array<Complex, 2> ComplexArray;
 typedef ComplexArray::index CAIndex;
 
 #endif // COMPLEXARRAY_H
