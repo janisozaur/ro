@@ -12,6 +12,8 @@ ExtractorInterface *ExtractorFactory::getExtractor(const QString &name,
     ExtractorInterface *extractor = nullptr;
     if (name == "fourier") {
         extractor = new FFT();
+    } else {
+        qCritical("no such extractor \"%s\"\n", name.toStdString().c_str());
     }
     if ((extractor != nullptr) && (!extractor->init(params))) {
         delete extractor;
