@@ -14,6 +14,7 @@ public:
     void setClass(const quint8 &dataClass);
     QVector<nnreal> data() const;
     quint8 dataClass() const;
+    void squeeze();
 
 private:
     QVector<nnreal> mData;

@@ -28,6 +28,11 @@ quint8 LabelledData::dataClass() const
     return mClass;
 }
 
+void LabelledData::squeeze()
+{
+    mData.squeeze();
+}
+
 QDataStream &operator<< (QDataStream &stream, const LabelledData &li)
 {
     stream << li.mData << li.mClass;
