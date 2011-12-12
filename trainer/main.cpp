@@ -38,9 +38,44 @@ int main(int argc, char *argv[])
     qsrand(QDateTime::currentDateTime().toTime_t());
     const QStringList args = a.arguments();
 
-    QFile f(args.at(1));
+    if (args.size() < 4) {
+        QStringList usage;
+        usage << args.at(0) << "[input file]" << "[output file]" << "[epochs]"
+              << "[lr]" << "[momentum]" << "[desired error]";
+        qCritical() << usage.join(" ");
+        return -1;
+    }
+    const QString inputFilename = args.at(1);
+    const QString outputFilename = args.at(2);
+    bool ok;
+    const nnreal maxEpochs = args.at(3).toInt(&ok);
+    if (!ok) {
+        const int argIdx = 3;
+        qCritical() << "failed to parsee arg" << argIdx << ":" << args.at(argIdx) << "as int";
+        return -1;
+    }
+    const nnreal lr = args.at(4).toFloat(&ok);
+    if (!ok) {
+        const int argIdx = 4;
+        qCritical() << "failed to parsee arg" << argIdx << ":" << args.at(argIdx) << "as float";
+        return -1;
+    }
+    const nnreal momentum = args.at(5).toFloat(&ok);
+    if (!ok) {
+        const int argIdx = 5;
+        qCritical() << "failed to parsee arg" << argIdx << ":" << args.at(argIdx) << "as float";
+        return -1;
+    }
+    const nnreal desiredError = args.at(6).toFloat(&ok);
+    if (!ok) {
+        const int argIdx = 6;
+        qCritical() << "failed to parsee arg" << argIdx << ":" << args.at(argIdx) << "as float";
+        return -1;
+    }
+    QFile f(inputFilename);
     if (!f.open(QIODevice::ReadOnly)) {
-        qCritical("failed to open file");
+        qCritical() << "failed to open file" << f.fileName();
+        return -2;
     }
     FeatureImporter td(&f);
     f.close();
@@ -63,7 +98,16 @@ int main(int argc, char *argv[])
         const QVector<nnreal> outData = classToVector(td.classIdForItem(i));
         output.append(outData);
     }
-    nn.train(input, output, 100, 0.8, 0.2, 0.1);
+    nn.train(input, output, maxEpochs, lr, momentum, desiredError);
+    QFile outputFile(outputFilename);
+    if (!outputFile.open(QIODevice::WriteOnly)) {
+        qCritical() << "failed to open file" << outputFile.fileName();
+        return -2;
+    }
+    QDataStream ds(&outputFile);
+    ds << nn;
+    outputFile.close();
+    qDebug() << "network saved to" << outputFilename;
 
     return 0;
 }
