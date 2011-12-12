@@ -4,6 +4,7 @@
 #include <QtCore/QCoreApplication>
 #include <QFile>
 #include <QVector>
+#include <QDateTime>
 
 #include <QDebug>
 
@@ -33,6 +34,8 @@ QVector<nnreal> classToVector(const quint8 &classId)
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+    qsrand(QDateTime::currentDateTime().toTime_t());
     const QStringList args = a.arguments();
 
     QFile f(args.at(1));
