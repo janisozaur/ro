@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     classifier \
-    extractor
+    extractor \
+    trainer
