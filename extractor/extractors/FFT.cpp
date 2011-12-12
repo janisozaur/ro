@@ -6,14 +6,12 @@
 
 // http://www.librow.com/articles/article-10
 
-FFT::FFT() :
-    mCA(nullptr)
+FFT::FFT()
 {
 }
 
 FFT::~FFT()
 {
-    delete mCA;
 }
 
 bool FFT::init(const QStringList &params)
@@ -47,7 +45,7 @@ bool FFT::init(const QStringList &params)
 }
 
 // return average value of fft power iterating over r values
-QVector<float> FFT::extract(const QImage &data, const int &x, const int &y)
+QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) const
 {
     if (data.format() != QImage::Format_Indexed8) {
         qCritical("Image is not greyscale!");
@@ -57,10 +55,9 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y)
 
     // the array created here might be bigger than image size - it has to be
     // a square of side length 2^n
-    delete mCA;
     const int w = mSize.width();
     const int h = mSize.height();
-    mCA = new ComplexArray(boost::extents[layers][w][h]);
+    ComplexArray *ca = new ComplexArray(boost::extents[layers][w][h]);
 
     // fill only the data that exists in the image
     for (int i = 0; i < layers; i++) {
@@ -68,17 +65,17 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y)
             for (int ax = 0; ax < mSize.width(); ax++) {
                 const int px = ((x - mSize.width() / 2 + ax) + data.width()) % data.width();
                 const int py = ((y - mSize.height() / 2 + ay) + data.height()) % data.height();
-                (*mCA)[i][ay][ax] = Complex(data.pixelIndex(px, py), 0);
+                (*ca)[i][ay][ax] = Complex(data.pixelIndex(px, py), 0);
             }
         }
     }
-    perform(mCA);
+    perform(ca);
 
     qreal minm = 0;
     qreal maxm = 0;
-    for (unsigned int j = 0; j < mCA->shape()[1]; j++) {
-        for (unsigned int k = 0; k < mCA->shape()[2]; k++) {
-            qreal magnitude = (*mCA)[0][j][k].abs();
+    for (unsigned int j = 0; j < ca->shape()[1]; j++) {
+        for (unsigned int k = 0; k < ca->shape()[2]; k++) {
+            qreal magnitude = (*ca)[0][j][k].abs();
             if (magnitude > maxm) {
                 maxm = magnitude;
             } else if (magnitude < minm) {
@@ -97,7 +94,7 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y)
         for (int i = 0; i < 360; i += 5) {
             const int x = r * cos(i) + maxR;
             const int y = r * sin(i) + maxR;
-            qreal p = (*mCA)[0][x][y].abs();
+            qreal p = (*ca)[0][x][y].abs();
             p = c * log(1.0 + p);
             sum += p;
             count++;
@@ -118,7 +115,7 @@ int FFT::size() const
     return mSize.width();
 }
 
-void FFT::rearrange(QVector<Complex> &elements)
+void FFT::rearrange(QVector<Complex> &elements) const
 {
     int target = 0;
     for (int position = 0; position < elements.count(); position++) {
@@ -138,7 +135,7 @@ void FFT::rearrange(QVector<Complex> &elements)
     }
 }
 
-void FFT::oneDFftH(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse)
+void FFT::oneDFftH(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse) const
 {
     for (unsigned int j = 0; j < ca->shape()[idx2]; j++) {
         QVector<Complex> elements;
@@ -154,7 +151,7 @@ void FFT::oneDFftH(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse)
     }
 }
 
-void FFT::oneDFftV(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse)
+void FFT::oneDFftV(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse) const
 {
     for (unsigned int j = 0; j < ca->shape()[idx2]; j++) {
         QVector<Complex> elements;
@@ -170,7 +167,7 @@ void FFT::oneDFftV(ComplexArray *ca, int idx, int idx1, int idx2, bool inverse)
     }
 }
 
-void FFT::perform(ComplexArray *ca, bool inverse)
+void FFT::perform(ComplexArray *ca, bool inverse) const
 {
     Q_ASSERT(ca->num_dimensions() == 3);
     for (unsigned int i = 0; i < ca->shape()[0]; i++) {
@@ -179,7 +176,7 @@ void FFT::perform(ComplexArray *ca, bool inverse)
     }
 }
 
-void FFT::transform(QVector<Complex> &elements, bool inverse)
+void FFT::transform(QVector<Complex> &elements, bool inverse) const
 {
     const unsigned int N = elements.count();
     const qreal pi = inverse ? M_PI : -M_PI;
