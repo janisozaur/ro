@@ -9,8 +9,11 @@
 #include <QTextStream>
 #include <limits>
 
+#define TEACH_BIAS_MOMENTUM
+
 NeuralNetwork::NeuralNetwork()
 {
+    id = qrand();
 }
 
 
@@ -55,7 +58,7 @@ nnreal NeuralNetwork::backprop(const QVector<nnreal> &input,
     for (int i = 0; i < lastLayerNeuronsCount; i++) {
         Neuron *neuron = mLayers.at(lastLayerIdx)->neuron(i);
 
-        const nnreal errorTemp = targetOutput[i] - output[i];
+        const nnreal errorTemp = targetOutput.at(i) - output.at(i);
         neuron->updateDelta(errorTemp);
 
         averageError += errorTemp * errorTemp;
@@ -76,8 +79,14 @@ nnreal NeuralNetwork::backprop(const QVector<nnreal> &input,
             conn->setWeight(weight + weightDelta);
         }
 
-        const nnreal neuronBias = neuron->bias();
-        neuron->setBias(neuronBias + (learningRate * delta));
+        nnreal momentumCoef = 0;
+#ifdef TEACH_BIAS_MOMENTUM
+        momentumCoef = momentum * neuron->biasDelta();
+#endif
+        const nnreal lrCoef = learningRate * delta;
+        const nnreal weightDelta = momentumCoef + lrCoef;
+        neuron->setBiasDelta(weightDelta);
+        neuron->setBias(neuron->bias() + weightDelta);
     }
 
     for (int i = lastLayerIdx - 1; i > 0; i--) {
@@ -258,17 +267,17 @@ QDataStream &operator>>(QDataStream &stream, NeuralNetwork &nn)
         nn.addLayer(neuronNum);
 
         for (int j = 0; j < neuronNum; j++) {
-            Neuron *current = nn.mLayers.at(i)->neuron(j);
+            Neuron *neuron = nn.mLayers.at(i)->neuron(j);
 
             nnreal bias;
             stream >> bias;
-            current->setBias(bias);
+            neuron->setBias(bias);
 
             Neuron::ActivationType at;
             int atInt;
             stream >> atInt;
             at = Neuron::ActivationType(atInt);
-            current->setActivationType(at);
+            neuron->setActivationType(at);
 
             int connectionsNum;
             stream >> connectionsNum;
@@ -281,7 +290,7 @@ QDataStream &operator>>(QDataStream &stream, NeuralNetwork &nn)
                 stream >> weight;
                 stream >> weightDelta;
 
-                Connection *conn = current->connection(k);
+                Connection *conn = neuron->connection(k);
                 conn->setNeuronIndex(neuronIndex);
                 conn->setWeightDelta(weightDelta);
                 conn->setWeight(weight);

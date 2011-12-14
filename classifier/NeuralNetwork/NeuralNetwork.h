@@ -33,6 +33,7 @@ public:
 
 private:
     QVector<NetworkLayer *> mLayers;
+    int id;
 };
 
 #endif // NEURALNETWORK_H

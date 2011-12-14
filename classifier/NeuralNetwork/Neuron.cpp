@@ -4,7 +4,7 @@
 #include <cmath>
 
 Neuron::Neuron() :
-    mOutput(nnreal(0.0)), mDelta(nnreal(0.0))
+    mOutput(nnreal(0.0)), mDelta(nnreal(0.0)), mBiasDelta(nnreal(0.0))
 {
     randomize();
 }
@@ -65,7 +65,7 @@ void Neuron::updateOutput(const nnreal &input)
             mOutput = tanh(input);
             break;
         case Neuron::Sigmoid:
-            mOutput = 1 / (1 + exp(-input));
+            mOutput = nnreal(1) / nnreal(1 + exp(-input));
             break;
     }
 }
@@ -75,7 +75,7 @@ nnreal Neuron::delta() const
     return mDelta;
 }
 
-void Neuron::updateDelta(nnreal error)
+void Neuron::updateDelta(const nnreal &error)
 {
     switch (mActivationType) {
         default:
@@ -97,4 +97,14 @@ nnreal Neuron::bias() const
 void Neuron::setBias(const nnreal &newBias)
 {
     mBias = newBias;
+}
+
+nnreal Neuron::biasDelta() const
+{
+    return mBiasDelta;
+}
+
+void Neuron::setBiasDelta(const nnreal &newDelta)
+{
+    mBiasDelta = newDelta;
 }

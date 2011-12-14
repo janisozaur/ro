@@ -29,14 +29,17 @@ public:
     nnreal output() const;
     void updateOutput(const nnreal &input);
     nnreal delta() const;
-    void updateDelta(nnreal error);
+    void updateDelta(const nnreal &input);
     nnreal bias() const;
     void setBias(const nnreal &newBias);
+    nnreal biasDelta() const;
+    void setBiasDelta(const nnreal &newDelta);
 
 private:
     nnreal mOutput;
     nnreal mBias;
     nnreal mDelta;
+    nnreal mBiasDelta;
     QVector<Connection *> mConnections;
     ActivationType mActivationType;
 };
