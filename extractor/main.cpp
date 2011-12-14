@@ -48,14 +48,22 @@ int main(int argc, char *argv[])
     QStringList subdirs = QStringList() << "wood" << "straw" << "salt" << "linen";
     QList<quint8> labels = QList<quint8>() << 32 << 96 << 160 << 224;
     QVector<LabelledData> trainData;
+    QElapsedTimer extractionTimer;
+    extractionTimer.start();
     unsigned int count = 0;
+    unsigned int imagesCount = 0;
     for (int j = 0; j < subdirs.size(); j++) {
         trainDir.cd(subdirs.at(j));
         const QFileInfoList fileList = trainDir.entryInfoList(QStringList() << "*.png");
         QElapsedTimer extractorTimer;
         extractorTimer.start();
-        for (int i = 0; i < qMin(fileList.size(), 0); i++) {
+        for (int i = 0; i < qMin(fileList.size(), 5); i++) {
+            imagesCount++;
             const QImage image(fileList.at(i).filePath());
+            if (image.format() != QImage::Format_Indexed8) {
+                qCritical("Image is not greyscale!");
+                return -1;
+            }
             trainData.resize(trainData.size() + image.width() * image.height());
             LabelledData *trainDataPtr = trainData.data();
 #pragma omp parallel for
@@ -73,7 +81,10 @@ int main(int argc, char *argv[])
         trainDir.cdUp();
     }
 
-    qDebug() << "trainSize:" << trainData.size();
+    const int msecs = extractionTimer.elapsed();
+    qDebug() << "trainSize:" << trainData.size() << "extraction of "
+             << imagesCount << "images took" << msecs << "msecs, average"
+             << float(msecs) / imagesCount << "msecs per image";
     const QString trainOutFilename(outputName + "_" + extractorName + "_train.out");
     QFile trainOutput(trainOutFilename);
     if (!trainOutput.open(QIODevice::WriteOnly)) {
