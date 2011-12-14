@@ -62,7 +62,8 @@ int main(int argc, char *argv[])
     QImage resultImg(size, QImage::Format_RGB32);
     const QString imageName(args.at(4));
 
-    int threadCount;
+    int threadCount = 1;
+#ifdef _OPENMP
 #pragma omp parallel
     {
 #pragma omp single
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
             threadCount = omp_get_num_threads();
         }
     }
+#endif
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
     const QString classifierName = args.at(5);
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
 
     QVector<quint8> classes(testFeatures.itemCount());
     quint8 *classesPtr = classes.data();
-    qDebug() << "starting classification";
+    qDebug() << "starting classification of" << testFeatures.itemCount() << "items";
     QElapsedTimer timer;
     timer.start();
 #pragma omp parallel
