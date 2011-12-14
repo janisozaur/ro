@@ -186,7 +186,7 @@ void NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
 
         epochError /= train.size();
 
-        lr *= 0.95;
+        //lr *= 0.95;
         out << "Epoch: " << epochNum << " error: " << epochError << endl;
         epochNum++;
     }
