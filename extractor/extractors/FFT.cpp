@@ -47,30 +47,35 @@ bool FFT::init(const QStringList &params)
 // return average value of fft power iterating over r values
 QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) const
 {
-    if (data.format() != QImage::Format_Indexed8) {
-        qCritical("Image is not greyscale!");
-    }
-
     // the array created here might be bigger than image size - it has to be
     // a square of side length 2^n
     const int w = mSize.width();
     const int h = mSize.height();
+    const int dw = data.width();
+    const int dh = data.height();
     ComplexArray *ca = new ComplexArray(boost::extents[w][h]);
 
     // fill only the data that exists in the image
-    for (int ay = 0; ay < mSize.height(); ay++) {
-        for (int ax = 0; ax < mSize.width(); ax++) {
-            const int px = ((x - mSize.width() / 2 + ax) + data.width()) % data.width();
-            const int py = ((y - mSize.height() / 2 + ay) + data.height()) % data.height();
-            (*ca)[ay][ax] = Complex(data.pixelIndex(px, py), 0);
+    for (int ay = 0; ay < h; ay++) {
+        int py = (y - h / 2 + ay) + dh;
+        while (py >= dh) {
+            py -= dh;
+        }
+        const uchar *d = data.scanLine(py);
+        for (int ax = 0; ax < w; ax++) {
+            int px = (x - w / 2 + ax) + dw;
+            while (px >= dw) {
+                px -= dw;
+            }
+            (*ca)[ay][ax] = Complex(d[px], 0);
         }
     }
     perform(ca);
 
     float minm = 0;
     float maxm = 0;
-    for (unsigned int j = 0; j < ca->shape()[0]; j++) {
-        for (unsigned int k = 0; k < ca->shape()[1]; k++) {
+    for (int j = 0; j < w; j++) {
+        for (int k = 0; k < h; k++) {
             float magnitude = (*ca)[j][k].abs();
             if (magnitude > maxm) {
                 maxm = magnitude;
@@ -82,7 +87,7 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
 
     float c = 255.0 / log(1.0 + abs(maxm - minm));
     QVector<float> result;
-    const int maxR = mSize.width() / 2;
+    const int maxR = w / 2;
     result.reserve(maxR);
     for (int r = 1; r < maxR; r++) {
         int count = 0;
