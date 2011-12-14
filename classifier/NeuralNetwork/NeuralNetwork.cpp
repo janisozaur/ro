@@ -163,7 +163,9 @@ void NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
     while (epochError > desiredError && epochNum < maxEpochs) {
         epochError = 0;
         QList<int> indices;
+#ifdef HAS_VECTOR_RESERVE
         indices.reserve(train.size());
+#endif
         for (int i = 0; i < train.size(); i++) {
             indices.append(i);
         }

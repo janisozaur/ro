@@ -1,6 +1,7 @@
 #include "Connection.h"
 
 #include <QtGlobal>
+#include <cstdlib>
 
 Connection::Connection(const int &neuronIndex, const nnreal &weight) :
     mNeuronIndex(neuronIndex),
