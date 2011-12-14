@@ -12,10 +12,10 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-#QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS += -fopenmp
-QMAKE_CXXFLAGS += -mtune=native -march=native
 QMAKE_CXXFLAGS += -ftree-vectorizer-verbose=2
+
+include(../common/projectsCommon.pro)
 
 LIBS += -lgomp
 

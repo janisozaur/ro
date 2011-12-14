@@ -6,3 +6,6 @@ SUBDIRS += \
     classifier \
     extractor \
     trainer
+
+OTHER_FILES += \
+    common/projectsCommon.pro
