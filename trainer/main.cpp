@@ -1,5 +1,6 @@
 #include "../classifier/NeuralNetwork/NeuralNetwork.h"
 #include "../classifier/FeatureImporter.h"
+#include "../common/CommonDefines.h"
 
 #include <QtCore/QCoreApplication>
 #include <QFile>
@@ -90,8 +91,10 @@ int main(int argc, char *argv[])
     nn.addLayer(4);
     QVector<QVector<nnreal> > input;
     QVector<QVector<nnreal> > output;
+#ifdef HAS_VECTOR_RESERVE
     input.reserve(td.itemCount());
     output.reserve(td.itemCount());
+#endif
     for (quint32 i = 0; i < td.itemCount(); i++) {
         const QVector<nnreal> inData = td.featuresForItem(i);
         input.append(inData);

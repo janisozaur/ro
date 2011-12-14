@@ -1,4 +1,5 @@
 #include "SortingQueue.h"
+#include "../common/CommonDefines.h"
 
 SortingQueue::SortingQueue(const qint8 &size) :
     mSize(size), mFarthest(0.0f)
@@ -38,7 +39,9 @@ void SortingQueue::tryAdd(const QPair<float, quint8> &element)
 QVector<QPair<float, quint8> > SortingQueue::toVector() const
 {
     QVector<QPair<float, quint8> > result;
+#ifdef HAS_VECTOR_RESERVE
     result.reserve(mList.size());
+#endif
     for (auto it = mList.constBegin(); it != mList.constEnd(); it++) {
         result.append(*it);
     }

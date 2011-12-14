@@ -1,8 +1,9 @@
 #include "FFT.h"
+#include "../../common/CommonDefines.h"
 
 #include <QImage>
 
-#include "QDebug"
+#include <QDebug>
 
 // http://www.librow.com/articles/article-10
 
@@ -88,7 +89,9 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
     float c = 255.0 / log(1.0 + abs(maxm - minm));
     QVector<float> result;
     const int maxR = w / 2;
+#ifdef HAS_VECTOR_RESERVE
     result.reserve(maxR);
+#endif
     for (int r = 1; r < maxR; r++) {
         int count = 0;
         float sum = 0;
@@ -141,7 +144,9 @@ void FFT::oneDFftH(ComplexArray *ca, int idx1, int idx2, bool inverse) const
 {
     for (unsigned int j = 0; j < ca->shape()[idx2]; j++) {
         QVector<Complex> elements;
+#ifdef HAS_VECTOR_RESERVE
         elements.reserve(ca->shape()[idx1]);
+#endif
         for (unsigned int k = 0; k < ca->shape()[idx1]; k++) {
             elements << (*ca)[k][j];
         }
@@ -157,7 +162,9 @@ void FFT::oneDFftV(ComplexArray *ca, int idx1, int idx2, bool inverse) const
 {
     for (unsigned int j = 0; j < ca->shape()[idx2]; j++) {
         QVector<Complex> elements;
+#ifdef HAS_VECTOR_RESERVE
         elements.reserve(ca->shape()[idx1]);
+#endif
         for (unsigned int k = 0; k < ca->shape()[idx1]; k++) {
             elements << (*ca)[j][k];
         }

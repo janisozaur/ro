@@ -1,11 +1,16 @@
 #include "FeatureImporter.h"
 #include "KnnClassifier.h"
 #include "NeuralNetwork/NeuralNetwork.h"
+#include "../common/CommonDefines.h"
 
 #include <QtCore/QCoreApplication>
 #include <QDebug>
 #include <QFile>
+#ifdef HAS_ELAPSED_TIMER
 #include <QElapsedTimer>
+#else
+#include <QTime>
+#endif
 #include <QHostInfo>
 #include <QTextCodec>
 #include <omp.h>
@@ -123,7 +128,11 @@ int main(int argc, char *argv[])
     QVector<quint8> classes(testFeatures.itemCount());
     quint8 *classesPtr = classes.data();
     qDebug() << "starting classification of" << testFeatures.itemCount() << "items";
+#ifdef HAS_ELAPSED_TIMER
     QElapsedTimer timer;
+#else
+    QTime timer;
+#endif
     timer.start();
 #pragma omp parallel
     {

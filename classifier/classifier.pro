@@ -42,4 +42,5 @@ HEADERS += \
     NeuralNetwork/Connection.h \
     NeuralNetwork/NetworkLayer.h \
     NeuralNetwork/NeuralNetwork.h \
-    ../common/LabelledData.h
+    ../common/LabelledData.h \
+    ../common/CommonDefines.h

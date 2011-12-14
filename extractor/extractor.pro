@@ -33,4 +33,5 @@ HEADERS += \
     extractors/ComplexArray.h \
     extractors/Complex.h \
     ../common/TypeCommon.h \
-    ../common/LabelledData.h
+    ../common/LabelledData.h \
+    ../common/CommonDefines.h

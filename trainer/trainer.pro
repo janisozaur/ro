@@ -14,7 +14,6 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-
 SOURCES += main.cpp \
     ../classifier/FeatureImporter.cpp \
     ../classifier/ClassifierInterface.cpp \
@@ -32,4 +31,5 @@ HEADERS += \
     ../classifier/NeuralNetwork/Connection.h \
     ../classifier/NeuralNetwork/NetworkLayer.h \
     ../classifier/NeuralNetwork/NeuralNetwork.h \
-    ../common/LabelledData.h
+    ../common/LabelledData.h \
+    ../common/CommonDefines.h

@@ -1,4 +1,5 @@
 #include "FeatureImporter.h"
+#include "../common/CommonDefines.h"
 
 #include <QIODevice>
 #include <QTextStream>
@@ -26,7 +27,10 @@ void FeatureImporter::open(QIODevice *data)
     stream >> mExtractorArgs;
     stream >> mFeatureCount;
     stream >> mItems;
+
+#ifdef HAS_VECTOR_RESERVE
     mFeatures.reserve(mItems.size() * mFeatureCount);
+#endif
     for (int i = 0; i < mItems.size(); i++) {
         mFeatures << mItems.at(i).data();
     }

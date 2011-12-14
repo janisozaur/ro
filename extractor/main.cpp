@@ -1,10 +1,16 @@
 #include "ExtractorFactory.h"
 #include "../common/LabelledData.h"
 #include "../common/TypeCommon.h"
+#include "../common/CommonDefines.h"
 
 #include <QtCore/QCoreApplication>
 #include <QDir>
+
+#ifdef HAS_ELAPSED_TIMER
 #include <QElapsedTimer>
+#else
+#include <QTime>
+#endif
 
 #include <QDebug>
 
@@ -48,14 +54,22 @@ int main(int argc, char *argv[])
     QStringList subdirs = QStringList() << "wood" << "straw" << "salt" << "linen";
     QList<quint8> labels = QList<quint8>() << 32 << 96 << 160 << 224;
     QVector<LabelledData> trainData;
+#ifdef HAS_ELAPSED_TIMER
     QElapsedTimer extractionTimer;
+#else
+    QTime extractionTimer;
+#endif
     extractionTimer.start();
     unsigned int count = 0;
     unsigned int imagesCount = 0;
     for (int j = 0; j < subdirs.size(); j++) {
         trainDir.cd(subdirs.at(j));
         const QFileInfoList fileList = trainDir.entryInfoList(QStringList() << "*.png");
+#ifdef HAS_ELAPSED_TIMER
         QElapsedTimer extractorTimer;
+#else
+        QTime extractorTimer;
+#endif
         extractorTimer.start();
         for (int i = 0; i < qMin(fileList.size(), 5); i++) {
             imagesCount++;
@@ -92,7 +106,11 @@ int main(int argc, char *argv[])
         return -3;
     }
     {
+#ifdef HAS_ELAPSED_TIMER
         QElapsedTimer saveTimer;
+#else
+        QTime saveTimer;
+#endif
         saveTimer.start();
         QDataStream outstream(&trainOutput);
         saveFeatures(outstream, extractorName, extractorArgs, extractor->size(), trainData);
@@ -101,13 +119,18 @@ int main(int argc, char *argv[])
     }
     trainOutput.close();
     trainData.clear();
+    return 0;
 
     {
         QDir testDir(testDirName);
         const QFileInfoList dataFileList  = testDir.entryInfoList(QStringList() << "test*.png");
         const QFileInfoList labelFileList = testDir.entryInfoList(QStringList() << "label*.png");
         Q_ASSERT(dataFileList.size() == labelFileList.size());
+#ifdef HAS_ELAPSED_TIMER
         QElapsedTimer extractorTimer;
+#else
+        QTime extractorTimer;
+#endif
         extractorTimer.start();
         QTextStream out(stdout);
         for (int i = 0; i < dataFileList.size(); i++) {
@@ -143,7 +166,11 @@ int main(int argc, char *argv[])
                 return -3;
             }
             {
+#ifdef HAS_ELAPSED_TIMER
                 QElapsedTimer saveTimer;
+#else
+                QTime saveTimer;
+#endif
                 saveTimer.start();
                 QDataStream outstream(&testOutput);
                 saveFeatures(outstream, extractorName, extractorArgs, extractor->size(), testData);
