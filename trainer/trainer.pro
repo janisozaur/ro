@@ -14,6 +14,8 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -mtune=native -march=native
+
 SOURCES += main.cpp \
     ../classifier/FeatureImporter.cpp \
     ../classifier/ClassifierInterface.cpp \

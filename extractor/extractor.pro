@@ -14,7 +14,7 @@ TEMPLATE = app
 
 #QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS += -fopenmp
-QMAKE_CXXFLAGS += -mtune=core2 -march=core2 -O3 -msse -msse2 -mssse3 -mmmx
+QMAKE_CXXFLAGS += -mtune=native -march=native
 QMAKE_CXXFLAGS += -ftree-vectorizer-verbose=2
 
 LIBS += -lgomp
