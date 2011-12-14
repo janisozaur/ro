@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     const QStringList extractorArgs = a.arguments().mid(5);
     ExtractorInterface *extractor =
             ExtractorFactory::getExtractor(extractorName, extractorArgs);
-    if (extractor == nullptr) {
+    if (extractor == NULL) {
         qCritical() << "failed to initialise extractor" << extractorName;
         return -2;
     }

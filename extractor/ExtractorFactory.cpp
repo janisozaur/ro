@@ -9,15 +9,15 @@ ExtractorFactory::ExtractorFactory()
 ExtractorInterface *ExtractorFactory::getExtractor(const QString &name,
                                                    const QStringList &params)
 {
-    ExtractorInterface *extractor = nullptr;
+    ExtractorInterface *extractor = NULL;
     if (name == "fourier") {
         extractor = new FFT();
     } else {
         qCritical("no such extractor \"%s\"\n", name.toStdString().c_str());
     }
-    if ((extractor != nullptr) && (!extractor->init(params))) {
+    if ((extractor != NULL) && (!extractor->init(params))) {
         delete extractor;
-        return nullptr;
+        return NULL;
     }
     return extractor;
 }

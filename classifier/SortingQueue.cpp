@@ -13,7 +13,7 @@ void SortingQueue::tryAdd(const QPair<float, quint8> &element)
             mList.append(element);
             return;
         } else {
-            auto it = mList.begin();
+            QLinkedList<QPair<float, quint8> >::iterator it = mList.begin();
             for (; it != mList.end(); ++it) {
                 if (element < (*it)) {
                     mList.insert(it, element);
@@ -25,7 +25,7 @@ void SortingQueue::tryAdd(const QPair<float, quint8> &element)
     } else if (element.first < mList.last().first) {
         mList.removeLast();
 
-        auto it = mList.begin();
+        QLinkedList<QPair<float, quint8> >::iterator it = mList.begin();
         for (; it != mList.end(); ++it) {
             if (element < (*it)) {
                 mList.insert(it, element);
@@ -42,7 +42,7 @@ QVector<QPair<float, quint8> > SortingQueue::toVector() const
 #ifdef HAS_VECTOR_RESERVE
     result.reserve(mList.size());
 #endif
-    for (auto it = mList.constBegin(); it != mList.constEnd(); it++) {
+    for (QLinkedList<QPair<float, quint8> >::const_iterator it = mList.constBegin(); it != mList.constEnd(); it++) {
         result.append(*it);
     }
     return result;

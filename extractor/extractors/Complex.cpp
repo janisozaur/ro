@@ -16,9 +16,10 @@ Complex::Complex(const Complex &other)
     this->mNumber = other.mNumber;
 }
 
-Complex::Complex(const float &real, const float &imaginary) :
-    mNumber({real, imaginary})
+Complex::Complex(const float &real, const float &imaginary)
 {
+    mNumber.x = real;
+    mNumber.y = imaginary;
 }
 
 Complex Complex::fromPowerPhase(const float &power, const float &phase)
