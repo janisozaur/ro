@@ -151,7 +151,7 @@ quint8 NeuralNetwork::outputVectorToLabel(const QVector<nnreal> &output) const
     return result;
 }
 
-void NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
+QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
                           const QVector<QVector<nnreal> > &exOutput,
                           const int &maxEpochs, const nnreal &learningRate,
                           const nnreal &momentum, const nnreal &desiredError)
@@ -160,15 +160,19 @@ void NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
     nnreal epochError = std::numeric_limits<nnreal>::infinity();
     int epochNum = 0;
     nnreal lr = learningRate;
+    QList<int> indicesBase;
+    QVector<float> result;
+#ifdef HAS_VECTOR_RESERVE
+    indicesBase.reserve(train.size());
+    result.reserve(maxEpochs);
+#endif
+    for (int i = 0; i < train.size(); i++) {
+        indicesBase.append(i);
+    }
     while (epochError > desiredError && epochNum < maxEpochs) {
         epochError = 0;
-        QList<int> indices;
-#ifdef HAS_VECTOR_RESERVE
-        indices.reserve(train.size());
-#endif
-        for (int i = 0; i < train.size(); i++) {
-            indices.append(i);
-        }
+
+        QList<int> indices = indicesBase;
 
         int sampleNum = 0;
         while (!indices.empty()) {
@@ -187,11 +191,13 @@ void NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
         }
 
         epochError /= train.size();
+        result << epochError;
 
         //lr *= 0.95;
         out << "Epoch: " << epochNum << " error: " << epochError << endl;
         epochNum++;
     }
+    return result;
 }
 
 

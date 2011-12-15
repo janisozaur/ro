@@ -9,9 +9,9 @@
 
 #include <QDebug>
 
-QVector<nnreal> classToVector(const quint8 &classId)
+QVector<nnreal> classToVector(const quint8 &classId, const int &initial)
 {
-    QVector<nnreal> result(4, -1);
+    QVector<nnreal> result(4, initial);
     int idx;
     switch (classId) {
         case 32:
@@ -86,9 +86,9 @@ int main(int argc, char *argv[])
              << td.featuresPerItem() << "features";
 
     NeuralNetwork nn;
-    nn.addLayer(td.featuresPerItem());
-    nn.addLayer(8);
-    nn.addLayer(4);
+    nn.addLayer(td.featuresPerItem(), Neuron::Sigmoid);
+    nn.addLayer(td.featuresPerItem() / 2, Neuron::Sigmoid);
+    nn.addLayer(4, Neuron::Sigmoid);
     QVector<QVector<nnreal> > input;
     QVector<QVector<nnreal> > output;
 #ifdef HAS_VECTOR_RESERVE
@@ -98,10 +98,43 @@ int main(int argc, char *argv[])
     for (quint32 i = 0; i < td.itemCount(); i++) {
         const QVector<nnreal> inData = td.featuresForItem(i);
         input.append(inData);
-        const QVector<nnreal> outData = classToVector(td.classIdForItem(i));
+        const QVector<nnreal> outData = classToVector(td.classIdForItem(i), 0);
         output.append(outData);
     }
-    nn.train(input, output, maxEpochs, lr, momentum, desiredError);
+    const QVector<float> errors = nn.train(input, output, maxEpochs, lr, momentum, desiredError);
+    {
+        QFile errorsFile("errors_" + outputFilename);
+        if (!errorsFile.open(QIODevice::WriteOnly)) {
+            qCritical() << "failed to open file" << errorsFile.fileName();
+            return -2;
+        }
+        QTextStream ts(&errorsFile);
+        for (int i = 0; i < errors.size(); i++) {
+            ts << errors.at(i) << endl;
+        }
+        errorsFile.close();
+    }
+    QList<int> indices;
+#ifdef HAS_VECTOR_RESERVE
+    indices.reserve(input.size());
+#endif
+    for (int i = 0; i < input.size(); i++) {
+        indices << i;
+    }
+    int correct = 0;
+    for (int i = 0; i < 100; i++) {
+        const int idx = qrand() % indices.size();
+        const int itemIdx = indices.takeAt(idx);
+        const QVector<nnreal> was = nn.classifyVec(input.at(itemIdx));
+        const QVector<nnreal> expected = output.at(itemIdx);
+        const int wc = nn.outputVectorToLabel(was);
+        const int ec = nn.outputVectorToLabel(expected);
+        if (wc == ec) {
+            correct++;
+        }
+        qDebug() << itemIdx << "was" << was << "(" << wc << "), expected:" << expected << "(" << ec << ")";
+    }
+    qDebug() << "correct:" << correct;
     QFile outputFile(outputFilename);
     if (!outputFile.open(QIODevice::WriteOnly)) {
         qCritical() << "failed to open file" << outputFile.fileName();

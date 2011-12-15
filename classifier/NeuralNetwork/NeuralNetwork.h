@@ -17,7 +17,7 @@ public:
                   const Neuron::ActivationType &activationFunctionType = Neuron::Tanh);
     quint8 classify(const QVector<nnreal> &input);
     quint8 outputVectorToLabel(const QVector<nnreal> &output) const;
-    void train(const QVector<QVector<nnreal> > &train,
+    QVector<float> train(const QVector<QVector<nnreal> > &train,
                const QVector<QVector<nnreal> > &exOutput,
                const int &maxEpochs, const nnreal &learningRate,
                const nnreal &momentum, const nnreal &desiredError);
