@@ -117,7 +117,7 @@ QString FFT::name() const
 
 int FFT::size() const
 {
-    return mSize.width() / 2;
+    return mSize.width() / 2 - 1;
 }
 
 void FFT::rearrange(QVector<Complex> &elements) const
