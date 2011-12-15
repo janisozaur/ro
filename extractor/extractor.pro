@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     ExtractorInterface.cpp \
     extractors/FFT.cpp \
     extractors/Complex.cpp \
-    ../common/LabelledData.cpp
+    ../common/LabelledData.cpp \
+    extractors/LBP.cpp
 
 HEADERS += \
     ExtractorFactory.h \
@@ -34,4 +35,5 @@ HEADERS += \
     extractors/Complex.h \
     ../common/TypeCommon.h \
     ../common/LabelledData.h \
-    ../common/CommonDefines.h
+    ../common/CommonDefines.h \
+    extractors/LBP.h
