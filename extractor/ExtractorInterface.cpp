@@ -16,3 +16,8 @@ QVector<QVector<float> > ExtractorInterface::postprocess(const QImage &/*img*/) 
 {
     return QVector<QVector<float> >();
 }
+
+bool ExtractorInterface::extracts() const
+{
+    return true;
+}

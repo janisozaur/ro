@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
                 return -1;
             }
             extractor->preprocess(image);
-            if (extractor->size() > 0) {
+            if (extractor->extracts()) {
                 unsigned int count = trainData.size();
                 trainData.resize(trainData.size() + image.width() * image.height());
                 LabelledData *trainDataPtr = trainData.data();
@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
                 for (int x = 0; x < image.width(); x++) {
                     for (int y = 0; y < image.height(); y++) {
                         const QVector<nnreal> res = extractor->extract(image, x, y);
+                        Q_ASSERT(res.size() == extractor->size());
                         LabelledData li(res, labels.at(j));
                         const unsigned int idx = count + x * image.height() + y;
                         trainDataPtr[idx] = li;
@@ -104,6 +105,7 @@ int main(int argc, char *argv[])
                 LabelledData *trainDataPtr = trainData.data();
 #pragma omp parallel for
                 for (int k = 0; k < ppCount; k++) {
+                    Q_ASSERT(ppFeatures.at(k).size() == extractor->size());
                     LabelledData ld(ppFeatures.at(k), labels.at(j));
                     trainDataPtr[count + k] = ld;
                 }

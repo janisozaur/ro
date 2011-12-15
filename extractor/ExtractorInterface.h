@@ -15,6 +15,7 @@ public:
     virtual int size() const = 0;
     virtual void preprocess(const QImage &img);
     virtual QVector<QVector<float> > postprocess(const QImage &img) const;
+    virtual bool extracts() const;
 };
 
 #endif // EXTRACTORINTERFACE_H
