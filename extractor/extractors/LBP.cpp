@@ -18,7 +18,7 @@ bool LBP::init(const QStringList &/*params*/)
                 changes++;
             }
         }
-        if (changes == 2) {
+        if (changes <= 2) {
             qDebug() << num << "is uniform!";
             mUniforms << i;
         }
