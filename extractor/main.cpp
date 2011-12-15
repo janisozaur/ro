@@ -51,6 +51,9 @@ int main(int argc, char *argv[])
     }
 
     QDir trainDir(trainDirName);
+    QDir outDir;
+    outDir.mkdir("data");
+    outDir.cd("data");
     QStringList subdirs = QStringList() << "wood" << "straw" << "salt" << "linen";
     QList<quint8> labels = QList<quint8>() << 32 << 96 << 160 << 224;
     QVector<LabelledData> trainData;
@@ -60,7 +63,6 @@ int main(int argc, char *argv[])
     QTime extractionTimer;
 #endif
     extractionTimer.start();
-    unsigned int count = 0;
     unsigned int imagesCount = 0;
     for (int j = 0; j < subdirs.size(); j++) {
         trainDir.cd(subdirs.at(j));
@@ -73,23 +75,39 @@ int main(int argc, char *argv[])
         extractorTimer.start();
         for (int i = 0; i < qMin(fileList.size(), 5); i++) {
             imagesCount++;
-            const QImage image(fileList.at(i).filePath());
+            QImage image(fileList.at(i).filePath());
+            image.setText("filename", outDir.absolutePath() + "/" + fileList.at(i).fileName());
             if (image.format() != QImage::Format_Indexed8) {
                 qCritical("Image is not greyscale!");
                 return -1;
             }
-            trainData.resize(trainData.size() + image.width() * image.height());
-            LabelledData *trainDataPtr = trainData.data();
+            extractor->preprocess(image);
+            if (extractor->size() > 0) {
+                unsigned int count = trainData.size();
+                trainData.resize(trainData.size() + image.width() * image.height());
+                LabelledData *trainDataPtr = trainData.data();
 #pragma omp parallel for
-            for (int x = 0; x < image.width(); x++) {
-                for (int y = 0; y < image.height(); y++) {
-                    const QVector<nnreal> res = extractor->extract(image, x, y);
-                    LabelledData li(res, labels.at(j));
-                    const unsigned int idx = count + x * image.height() + y;
-                    trainDataPtr[idx] = li;
+                for (int x = 0; x < image.width(); x++) {
+                    for (int y = 0; y < image.height(); y++) {
+                        const QVector<nnreal> res = extractor->extract(image, x, y);
+                        LabelledData li(res, labels.at(j));
+                        const unsigned int idx = count + x * image.height() + y;
+                        trainDataPtr[idx] = li;
+                    }
                 }
             }
-            count += image.width() * image.height();
+            const QVector<QVector<nnreal> > ppFeatures = extractor->postprocess(image);
+            const int ppCount = ppFeatures.size();
+            if (ppCount > 0) {
+                const int count = trainData.size();
+                trainData.resize(trainData.size() + ppFeatures.size());
+                LabelledData *trainDataPtr = trainData.data();
+#pragma omp parallel for
+                for (int k = 0; k < ppCount; k++) {
+                    LabelledData ld(ppFeatures.at(k), labels.at(j));
+                    trainDataPtr[count + k] = ld;
+                }
+            }
             qDebug() << fileList.at(i).filePath() << extractorTimer.restart();
         }
         trainDir.cdUp();
@@ -134,7 +152,7 @@ int main(int argc, char *argv[])
         extractorTimer.start();
         QTextStream out(stdout);
         for (int i = 0; i < dataFileList.size(); i++) {
-            count = 0;
+            unsigned int count = 0;
             const QImage dataImage(dataFileList.at(i).filePath());
             const QImage labelImage(labelFileList.at(i).filePath());
             QVector<LabelledData> testData(dataImage.width() * dataImage.height());
