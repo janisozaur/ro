@@ -51,9 +51,6 @@ int main(int argc, char *argv[])
     }
 
     QDir trainDir(trainDirName);
-    QDir outDir;
-    outDir.mkdir("data");
-    outDir.cd("data");
     QStringList subdirs = QStringList() << "wood" << "straw" << "salt" << "linen";
     QList<quint8> labels = QList<quint8>() << 32 << 96 << 160 << 224;
     QVector<LabelledData> trainData;
@@ -75,8 +72,8 @@ int main(int argc, char *argv[])
         extractorTimer.start();
         for (int i = 0; i < qMin(fileList.size(), 5); i++) {
             imagesCount++;
-            QImage image(fileList.at(i).filePath());
-            image.setText("filename", outDir.absolutePath() + "/" + fileList.at(i).fileName());
+            const QString filename = fileList.at(i).filePath();
+            const QImage image(filename);
             if (image.format() != QImage::Format_Indexed8) {
                 qCritical("Image is not greyscale!");
                 return -1;
@@ -139,7 +136,6 @@ int main(int argc, char *argv[])
     }
     trainOutput.close();
     trainData.clear();
-    return 0;
 
     {
         QDir testDir(testDirName);
