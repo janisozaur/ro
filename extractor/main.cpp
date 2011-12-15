@@ -150,30 +150,34 @@ int main(int argc, char *argv[])
         extractorTimer.start();
         QTextStream out(stdout);
         for (int i = 0; i < dataFileList.size(); i++) {
-            unsigned int count = 0;
             const QImage dataImage(dataFileList.at(i).filePath());
             const QImage labelImage(labelFileList.at(i).filePath());
+            extractor->preprocessTest(dataImage, labelImage);
             QVector<LabelledData> testData(dataImage.width() * dataImage.height());
             LabelledData *testDataPtr = testData.data();
             int cnt = 0;
+            if (extractor->extracts()) {
+                unsigned int count = testData.size();
 #pragma omp parallel for
-            for (int x = 0; x < dataImage.width(); x++) {
+                for (int x = 0; x < dataImage.width(); x++) {
 #pragma omp critical
-                {
-                    cnt++;
-                    out << cnt * 100 / dataImage.width() << "%" << '\r';
-                    out.flush();
-                }
-                for (int y = 0; y < dataImage.height(); y++) {
-                    const QVector<nnreal> res = extractor->extract(dataImage, x, y);
-                    const quint8 c = labelImage.pixelIndex(x, y);
-                    LabelledData li(res, c);
-                    li.squeeze();
-                    const unsigned int idx = count + x * dataImage.height() + y;
-                    testDataPtr[idx] = li;
+                    {
+                        cnt++;
+                        out << cnt * 100 / dataImage.width() << "%" << '\r';
+                        out.flush();
+                    }
+                    for (int y = 0; y < dataImage.height(); y++) {
+                        const QVector<nnreal> res = extractor->extract(dataImage, x, y);
+                        const quint8 c = labelImage.pixelIndex(x, y);
+                        LabelledData li(res, c);
+                        li.squeeze();
+                        const unsigned int idx = count + x * dataImage.height() + y;
+                        testDataPtr[idx] = li;
+                    }
                 }
             }
-            count += dataImage.width() * dataImage.height();
+            const QVector<LabelledData> ppFeatures = extractor->postprocessTest(dataImage, labelImage);
+            testData << ppFeatures;
             qDebug() << dataFileList.at(i).filePath() << extractorTimer.restart();
             const QString testOutFilename(outputName + "_" + extractorName + "_test" + QString::number(i) + ".out");
             QFile testOutput(testOutFilename);

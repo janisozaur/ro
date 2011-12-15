@@ -21,3 +21,13 @@ bool ExtractorInterface::extracts() const
 {
     return true;
 }
+
+void ExtractorInterface::preprocessTest(const QImage &/*data*/, const QImage &/*label*/)
+{
+}
+
+QVector<LabelledData> ExtractorInterface::postprocessTest(const QImage &/*data*/,
+                                                          const QImage &/*label*/) const
+{
+    return QVector<LabelledData>();
+}
