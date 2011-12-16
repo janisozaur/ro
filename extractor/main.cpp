@@ -173,9 +173,9 @@ int main(int argc, char *argv[])
             extractor->preprocessTest(dataImage, labelImage);
             int cnt = 0;
             if (extractor->extracts()) {
+                unsigned int count = testData.size();
                 testData.resize(dataImage.width() * dataImage.height());
                 LabelledData *testDataPtr = testData.data();
-                unsigned int count = testData.size();
 #pragma omp parallel for
                 for (int x = 0; x < dataImage.width(); x++) {
 #pragma omp critical
