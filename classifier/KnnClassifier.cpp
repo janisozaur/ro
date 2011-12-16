@@ -33,7 +33,7 @@ quint8 KnnClassifier::classify(const QVector<nnreal> &tf)
 #ifdef SSE_VECT
         for (quint32 k = 0; k < mFeaturesPerItem; k += 4) {
 #else
-        for (quint32 k = 0; k < featuresPerItem; k++) {
+        for (quint32 k = 0; k < mFeaturesPerItem; k++) {
 #endif
             float featureDistance1 = fabs(testFeatures[k] - mTrainFeatures[j * mFeaturesPerItem + k]);
 #ifdef SSE_VECT
