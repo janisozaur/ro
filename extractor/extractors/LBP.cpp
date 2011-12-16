@@ -100,7 +100,7 @@ void LBP::preprocess(const QImage &img)
                 }
                 delta *= 2;
             }
-            int p = mUniforms.indexOf(acc) + 1;
+            const int p = mUniforms.indexOf(acc) + 1;
             mLBPImage.setPixel(centre, p);
         }
     }
