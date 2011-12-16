@@ -2,6 +2,7 @@
 
 #include "extractors/FFT.h"
 #include "extractors/LBP.h"
+#include "extractors/AutoCorrelation.h"
 
 ExtractorFactory::ExtractorFactory()
 {
@@ -15,6 +16,8 @@ ExtractorInterface *ExtractorFactory::getExtractor(const QString &name,
         extractor = new FFT();
     } else if (name == "lbp") {
         extractor = new LBP();
+    } else if (name == "ac") {
+        extractor = new AutoCorrelation();
     } else {
         qCritical("no such extractor \"%s\"\n", name.toStdString().c_str());
     }
