@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
         }
     }
 #endif
+    qDebug() << "using" << threadCount << "threads.";
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
     const QString classifierName = args.at(5);
