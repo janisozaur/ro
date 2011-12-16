@@ -6,7 +6,7 @@
 #include <QPair>
 #include <QHash>
 
-#define SSE_VECT
+//#define SSE_VECT
 
 KnnClassifier::KnnClassifier(const qint8 &k, const FeatureImporter &trainData) :
     mTrainData(trainData), mTrainFeatures(trainData.features()), mTrainItemCount(trainData.itemCount()),
