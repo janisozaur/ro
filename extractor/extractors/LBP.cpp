@@ -126,3 +126,41 @@ QVector<float> LBP::extract(const QImage &/*data*/, const int &/*x*/, const int 
 {
     return QVector<float>();
 }
+
+void LBP::preprocessTest(const QImage &data, const QImage &/*label*/)
+{
+    preprocess(data);
+}
+
+QVector<LabelledData> LBP::postprocessTest(const QImage &data, const QImage &label) const
+{
+    QVector<LabelledData> result;
+    const int w = 32;
+    const int h = 32;
+    const int dw = data.width();
+    const int dh = data.height();
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            QVector<nnreal> hist(mUniforms.size() + 1);
+            float *histPtr = hist.data();
+            for (int ay = 0; ay < h; ay++) {
+                int py = (y - h / 2 + ay) + dh;
+                while (py >= dh) {
+                    py -= dh;
+                }
+                const uchar *d = mLBPImage.constScanLine(py);
+                for (int ax = 0; ax < w; ax++) {
+                    int px = (x - w / 2 + ax) + dw;
+                    while (px >= dw) {
+                        px -= dw;
+                    }
+                    const int p = d[x];
+                    histPtr[p]++;
+                }
+            }
+            const LabelledData li(hist, label.pixelIndex(x, y));
+            result.append(li);
+        }
+    }
+    return result;
+}

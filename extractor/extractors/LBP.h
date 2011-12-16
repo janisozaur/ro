@@ -12,6 +12,8 @@ public:
     virtual int size() const;
     virtual void preprocess(const QImage &img);
     virtual QVector<QVector<float> > postprocess(const QImage &img) const;
+    virtual void preprocessTest(const QImage &data, const QImage &label);
+    virtual QVector<LabelledData> postprocessTest(const QImage &data, const QImage &label) const;
     virtual bool extracts() const;
 
 private:
