@@ -118,6 +118,13 @@ QVector<QVector<float> > LBP::postprocess(const QImage &/*img*/) const
             histPtr[p]++;
         }
     }
+    float sum = 0;
+    for (int i = 0; i < hist.size(); i++) {
+        sum += hist.at(i);
+    }
+    for (int i = 0; i < hist.size(); i++) {
+        hist[i] /= sum;
+    }
     result.append(hist);
     return result;
 }
@@ -157,6 +164,13 @@ QVector<LabelledData> LBP::postprocessTest(const QImage &data, const QImage &lab
                     const int p = d[x];
                     histPtr[p]++;
                 }
+            }
+            float sum = 0;
+            for (int i = 0; i < hist.size(); i++) {
+                sum += hist.at(i);
+            }
+            for (int i = 0; i < hist.size(); i++) {
+                hist[i] /= sum;
             }
             const LabelledData li(hist, label.pixelIndex(x, y));
             result.append(li);
