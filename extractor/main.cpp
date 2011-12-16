@@ -12,6 +12,10 @@
 #include <QTime>
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <QDebug>
 
 void saveFeatures(QDataStream &outstream, const QString &extractorName,
@@ -59,6 +63,19 @@ int main(int argc, char *argv[])
 #else
     QTime extractionTimer;
 #endif
+
+    int threadCount = 1;
+#ifdef _OPENMP
+#pragma omp parallel
+    {
+#pragma omp single
+        {
+            threadCount = omp_get_num_threads();
+        }
+    }
+#endif
+    qDebug() << "using" << threadCount << "threads.";
+
     extractionTimer.start();
     unsigned int imagesCount = 0;
     for (int j = 0; j < subdirs.size(); j++) {
