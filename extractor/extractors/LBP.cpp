@@ -151,8 +151,8 @@ QVector<LabelledData> LBP::postprocessTest(const QImage &data, const QImage &lab
     const int h = 32;
     const int dw = data.width();
     const int dh = data.height();
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
+    for (int y = 0; y < dh; y++) {
+        for (int x = 0; x < dw; x++) {
             QVector<nnreal> hist(mUniforms.size() + 1);
             float *histPtr = hist.data();
             for (int ay = 0; ay < h; ay++) {
