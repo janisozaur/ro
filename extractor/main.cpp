@@ -152,11 +152,12 @@ int main(int argc, char *argv[])
         for (int i = 0; i < dataFileList.size(); i++) {
             const QImage dataImage(dataFileList.at(i).filePath());
             const QImage labelImage(labelFileList.at(i).filePath());
+            QVector<LabelledData> testData;
             extractor->preprocessTest(dataImage, labelImage);
-            QVector<LabelledData> testData(dataImage.width() * dataImage.height());
-            LabelledData *testDataPtr = testData.data();
             int cnt = 0;
             if (extractor->extracts()) {
+                testData.resize(dataImage.width() * dataImage.height());
+                LabelledData *testDataPtr = testData.data();
                 unsigned int count = testData.size();
 #pragma omp parallel for
                 for (int x = 0; x < dataImage.width(); x++) {
