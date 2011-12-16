@@ -1,4 +1,5 @@
 #include "LBP.h"
+#include "../../common/CommonDefines.h"
 
 #include <QDebug>
 
@@ -155,7 +156,11 @@ QVector<LabelledData> LBP::postprocessTest(const QImage &data, const QImage &lab
                 while (py >= dh) {
                     py -= dh;
                 }
-                const uchar *d = mLBPImage.constScanLine(py);
+                #ifdef HAS_IMAGE_CONSTSCANLINE
+                    const uchar *d = mLBPImage.constScanLine(py);
+                #else
+                    const uchar *d = mLBPImage.scanLine(py);
+                #endif
                 for (int ax = 0; ax < w; ax++) {
                     int px = (x - w / 2 + ax) + dw;
                     while (px >= dw) {

@@ -18,6 +18,9 @@
     #ifndef HAS_VECTOR_RESERVE
        #define HAS_VECTOR_RESERVE
     #endif
+    #ifndef HAS_IMAGE_CONSTSCANLINE
+        #define HAS_IMAGE_CONSTSCANLINE
+    #endif
 #else
     #warning this qt version is outdated
 #endif
