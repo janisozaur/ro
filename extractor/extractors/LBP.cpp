@@ -113,7 +113,11 @@ QVector<QVector<float> > LBP::postprocess(const QImage &/*img*/) const
     QVector<float> hist(mUniforms.size() + 1);
     float *histPtr = hist.data();
     for (int y = 0; y < mLBPImage.height(); y++) {
-        const uchar *data = mLBPImage.constScanLine(y);
+        #ifdef HAS_IMAGE_CONSTSCANLINE
+            const uchar *data = mLBPImage.constScanLine(y);
+        #else
+            const uchar *data = mLBPImage.scanLine(y);
+        #endif
         for (int x = 0; x < mLBPImage.bytesPerLine(); x++) {
             const int p = data[x];
             histPtr[p]++;
