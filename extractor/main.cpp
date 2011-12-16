@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         QTime extractorTimer;
 #endif
         extractorTimer.start();
-        for (int i = 0; i < qMin(fileList.size(), 5); i++) {
+        for (int i = 0; i < fileList.size(); i++) {
             imagesCount++;
             const QString filename = fileList.at(i).filePath();
             const QImage image(filename);
