@@ -126,9 +126,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    QVector<quint8> classes(testFeatures.itemCount());
+    const int testItemCount = testFeatures.itemCount();
+    QVector<quint8> classes(testItemCount);
     quint8 *classesPtr = classes.data();
-    qDebug() << "starting classification of" << testFeatures.itemCount() << "items";
+    qDebug() << "starting classification of" << testItemCount << "items";
 #ifdef HAS_ELAPSED_TIMER
     QElapsedTimer timer;
 #else
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
     {
         const int threadNum = omp_get_thread_num();
         #pragma omp for
-        for (quint32 i = 0; i < testFeatures.itemCount(); i++) {
+        for (quint32 i = 0; i < testItemCount; i++) {
             classesPtr[i] = ci[threadNum]->classify(testFeatures.featuresForItem(i));
         }
     }
@@ -160,7 +161,7 @@ int main(int argc, char *argv[])
         const int y = i / size.width();
         resultImg.setPixel(x, y, qRgb(c, c, c));
     }
-    qDebug() << "correctness:" << float(correctCount) / float(testFeatures.itemCount()) * 100;
+    qDebug() << "correctness:" << float(correctCount) / float(testItemCount) * 100;
     resultImg.save(imageName + ".png");
 
 //    QString filenameBase("gnuplot_%1_%2_%3_%4.dat");
