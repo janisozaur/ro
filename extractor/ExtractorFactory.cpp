@@ -1,6 +1,7 @@
 #include "ExtractorFactory.h"
 
 #include "extractors/FFT.h"
+#include "extractors/FFTSum.h"
 #include "extractors/LBP.h"
 #include "extractors/AutoCorrelation.h"
 
@@ -14,6 +15,8 @@ ExtractorInterface *ExtractorFactory::getExtractor(const QString &name,
     ExtractorInterface *extractor = NULL;
     if (name == "fourier") {
         extractor = new FFT();
+    } else if (name == "fouriersum") {
+        extractor = new FFTSum();
     } else if (name == "lbp") {
         extractor = new LBP();
     } else if (name == "ac") {

@@ -26,7 +26,8 @@ SOURCES += main.cpp \
     extractors/Complex.cpp \
     ../common/LabelledData.cpp \
     extractors/LBP.cpp \
-    extractors/AutoCorrelation.cpp
+    extractors/AutoCorrelation.cpp \
+    extractors/FFTSum.cpp
 
 HEADERS += \
     ExtractorFactory.h \
@@ -38,4 +39,5 @@ HEADERS += \
     ../common/LabelledData.h \
     ../common/CommonDefines.h \
     extractors/LBP.h \
-    extractors/AutoCorrelation.h
+    extractors/AutoCorrelation.h \
+    extractors/FFTSum.h
