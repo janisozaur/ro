@@ -41,11 +41,11 @@ quint8 KnnClassifier::classify(const QVector<nnreal> &tf)
             float featureDistance3 = fabs(testFeatures[k + 2] - mTrainFeatures[j * mFeaturesPerItem + k + 2]);
             float featureDistance4 = fabs(testFeatures[k + 3] - mTrainFeatures[j * mFeaturesPerItem + k + 3]);
 #endif
-            featureDistance1 = featureDistance1 * featureDistance1 * featureDistance1;
+            featureDistance1 = featureDistance1 * featureDistance1;
 #ifdef SSE_VECT
-            featureDistance2 = featureDistance2 * featureDistance2 * featureDistance2;
-            featureDistance3 = featureDistance3 * featureDistance3 * featureDistance3;
-            featureDistance4 = featureDistance4 * featureDistance4 * featureDistance4;
+            featureDistance2 = featureDistance2 * featureDistance2;
+            featureDistance3 = featureDistance3 * featureDistance3;
+            featureDistance4 = featureDistance4 * featureDistance4;
 #endif
 #ifdef SSE_VECT
             const float dist12 = featureDistance1 + featureDistance2;
@@ -55,7 +55,8 @@ quint8 KnnClassifier::classify(const QVector<nnreal> &tf)
             distanceSum += featureDistance1;
 #endif
         }
-        distanceSum = pow(distanceSum, power);
+        //distanceSum = pow(distanceSum, power);
+        distanceSum = sqrt(distanceSum);
         q.tryAdd(qMakePair(distanceSum, mTrainData.classIdForItem(j)));
     }
     distances = q.toVector();
