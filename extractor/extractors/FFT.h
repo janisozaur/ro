@@ -26,6 +26,7 @@ private:
     void oneDFftV(ComplexArray *ca, int idx1, int idx2, bool inverse) const;
 
     QSize mSize;
+    QVector<float> mWindow;
 };
 
 #endif // FFT_H

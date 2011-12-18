@@ -42,6 +42,10 @@ bool FFT::init(const QStringList &params)
         return false;
     }
     mSize = QSize(size, size);
+    mWindow.resize(size);
+    for (int i = 0; i < size; i++) {
+        mWindow[i] = (0.54 - 0.46 * cos(2.0 * M_PI * float(i) / float(size - 1)));
+    }
     return true;
 }
 
@@ -62,17 +66,19 @@ QVector<float> FFT::extract(const QImage &data, const int &x, const int &y) cons
         while (py >= dh) {
             py -= dh;
         }
+        const float wY = mWindow.at(ay);
         #ifdef HAS_IMAGE_CONSTSCANLINE
             const uchar *d = data.constScanLine(py);
         #else
             const uchar *d = data.scanLine(py);
         #endif
         for (int ax = 0; ax < w; ax++) {
+            const float wX = mWindow.at(ax);
             int px = (x - w / 2 + ax) + dw;
             while (px >= dw) {
                 px -= dw;
             }
-            (*ca)[ay][ax] = Complex(d[px], 0);
+            (*ca)[ay][ax] = Complex(d[px] * wX * wY, 0);
         }
     }
     perform(ca);
