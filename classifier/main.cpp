@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     {
         const int threadNum = omp_get_thread_num();
         #pragma omp for
-        for (quint32 i = 0; i < testItemCount; i++) {
+        for (int i = 0; i < testItemCount; i++) {
             classesPtr[i] = ci[threadNum]->classify(testFeatures.featuresForItem(i));
         }
     }
