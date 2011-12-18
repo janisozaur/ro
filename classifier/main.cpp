@@ -172,8 +172,13 @@ int main(int argc, char *argv[])
         resultImg.setPixel(x, y, qRgb(c, c, c));
     }
     qDebug() << "correctness:" << float(correctCount) / float(testItemCount) * 100;
-    qDebug() << "saving to" << imageName + ".png";
-    resultImg.save(imageName + ".png");
+    const QString imageFilename = imageName + ".png";
+    const bool saved = resultImg.save(imageFilename);
+    if (saved) {
+        qDebug() << "succesfully saved to" << imageFilename;
+    } else {
+        qDebug() << "saving to" << imageFilename << "failed!";
+    }
 
 //    QString filenameBase("gnuplot_%1_%2_%3_%4.dat");
 //    QString hostname(QHostInfo::localHostName());
