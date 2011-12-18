@@ -46,8 +46,6 @@ quint8 KnnClassifier::classify(const QVector<nnreal> &tf)
             featureDistance2 = featureDistance2 * featureDistance2;
             featureDistance3 = featureDistance3 * featureDistance3;
             featureDistance4 = featureDistance4 * featureDistance4;
-#endif
-#ifdef SSE_VECT
             const float dist12 = featureDistance1 + featureDistance2;
             const float dist34 = featureDistance3 + featureDistance4;
             distanceSum += dist12 + dist34;
