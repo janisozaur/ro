@@ -200,37 +200,6 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
     return result;
 }
 
-
-void NeuralNetwork::createOutputVector(const quint8 &label, QVector<nnreal> &outputVec) const
-{
-    outputVec.clear();
-
-    if(label == 32) {
-        outputVec.push_back(0.75);
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.25);
-    }
-    else if(label == 96) {
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.75);
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.25);
-    }
-    else if(label == 160) {
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.75);
-        outputVec.push_back(0.25);
-    }
-    else {
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.25);
-        outputVec.push_back(0.75);
-    }
-}
-
 QDataStream &operator<<(QDataStream &stream, const NeuralNetwork &nn)
 {
     int size = sizeof(nnreal);

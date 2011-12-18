@@ -21,7 +21,6 @@ public:
                const QVector<QVector<nnreal> > &exOutput,
                const int &maxEpochs, const nnreal &learningRate,
                const nnreal &momentum, const nnreal &desiredError);
-    void createOutputVector(const quint8 &label, QVector<nnreal> &outputVec) const;
 
     QVector<nnreal> classifyVec(const QVector<nnreal> &input);
     nnreal backprop(const QVector<nnreal> &input,
