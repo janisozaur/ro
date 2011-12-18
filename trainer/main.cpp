@@ -104,7 +104,14 @@ int main(int argc, char *argv[])
         const QVector<nnreal> outData = classToVector(td.classIdForItem(i), 0);
         output.append(outData);
     }
-    const QVector<float> errors = nn.train(input, output, maxEpochs, lr, momentum, desiredError);
+    QFile outputFile(outputFilename);
+    if (!outputFile.open(QIODevice::WriteOnly)) {
+        qCritical() << "failed to open file" << outputFile.fileName();
+        return -2;
+    }
+    QDataStream ds(&outputFile);
+    const QVector<float> errors = nn.train(input, output, maxEpochs, lr, momentum, desiredError, ds);
+    outputFile.close();
     {
         QFile errorsFile("errors_" + outputFilename);
         if (!errorsFile.open(QIODevice::WriteOnly)) {
@@ -124,6 +131,14 @@ int main(int argc, char *argv[])
     for (int i = 0; i < input.size(); i++) {
         indices << i;
     }
+    if (!outputFile.open(QIODevice::ReadOnly)) {
+        qCritical() << "failed to open file" << outputFile.fileName();
+        return -2;
+    } else {
+        QDataStream inds(&outputFile);
+        inds >> nn;
+        outputFile.close();
+    }
     int correct = 0;
     for (int i = 0; i < 100; i++) {
         const int idx = qrand() % indices.size();
@@ -138,14 +153,6 @@ int main(int argc, char *argv[])
         qDebug() << itemIdx << "was" << was << "(" << wc << "), expected:" << expected << "(" << ec << ")";
     }
     qDebug() << "correct:" << correct;
-    QFile outputFile(outputFilename);
-    if (!outputFile.open(QIODevice::WriteOnly)) {
-        qCritical() << "failed to open file" << outputFile.fileName();
-        return -2;
-    }
-    QDataStream ds(&outputFile);
-    ds << nn;
-    outputFile.close();
     qDebug() << "network saved to" << outputFilename;
 
     return 0;

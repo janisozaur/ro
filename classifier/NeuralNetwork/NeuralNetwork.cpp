@@ -160,7 +160,8 @@ quint8 NeuralNetwork::outputVectorToLabel(const QVector<nnreal> &output) const
 QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
                           const QVector<QVector<nnreal> > &exOutput,
                           const int &maxEpochs, const nnreal &learningRate,
-                          const nnreal &momentum, const nnreal &desiredError)
+                          const nnreal &momentum, const nnreal &desiredError,
+                          QDataStream &nnout)
 {
     QTextStream out(stdout);
     nnreal epochError = std::numeric_limits<nnreal>::infinity();
@@ -181,6 +182,7 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
     QTime epochTimer;
 #endif
     epochTimer.start();
+    float best = std::numeric_limits<nnreal>::infinity();
     while (epochError > desiredError && epochNum < maxEpochs) {
 
         epochError = 0;
@@ -204,12 +206,18 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
         }
 
         epochError /= train.size();
+        bool saved = false;
+        if (epochError < best) {
+            best = epochError;
+            nnout << *this;
+            saved = true;
+        }
         result << epochError;
 
         //lr *= 0.95;
         const int msecs = epochTimer.restart();
         out << "Epoch: " << epochNum << " error: " << epochError << ", "
-            << msecs << "msecs" << endl;
+            << msecs << "msecs, saved: " << saved << endl;
         epochNum++;
     }
     return result;

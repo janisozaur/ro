@@ -20,7 +20,7 @@ public:
     QVector<float> train(const QVector<QVector<nnreal> > &train,
                const QVector<QVector<nnreal> > &exOutput,
                const int &maxEpochs, const nnreal &learningRate,
-               const nnreal &momentum, const nnreal &desiredError);
+               const nnreal &momentum, const nnreal &desiredError, QDataStream &out);
 
     QVector<nnreal> classifyVec(const QVector<nnreal> &input);
     nnreal backprop(const QVector<nnreal> &input,
