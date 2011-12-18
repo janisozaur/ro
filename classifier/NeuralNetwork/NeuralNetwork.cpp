@@ -208,7 +208,8 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
 
         //lr *= 0.95;
         const int msecs = epochTimer.restart();
-        out << "Epoch: " << epochNum << " error: " << epochError << msecs << "msecs" << endl;
+        out << "Epoch: " << epochNum << " error: " << epochError << ', '
+            << msecs << "msecs" << endl;
         epochNum++;
     }
     return result;
