@@ -166,7 +166,7 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
     QTextStream out(stdout);
     nnreal epochError = std::numeric_limits<nnreal>::infinity();
     int epochNum = 0;
-    nnreal lr = learningRate;
+    double lr = learningRate;
     QList<int> indicesBase;
     QVector<float> result;
 #ifdef HAS_VECTOR_RESERVE
@@ -211,10 +211,12 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
             best = epochError;
             nnout << *this;
             saved = true;
+        } else if (epochError > best * 3 / 2) {
+            epochNum = maxEpochs;
         }
         result << epochError;
 
-        //lr *= 0.95;
+        lr *= 0.999;
         const int msecs = epochTimer.restart();
         out << "Epoch: " << epochNum << " error: " << epochError << ", "
             << msecs << "msecs, saved: " << saved << endl;
