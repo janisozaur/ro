@@ -172,6 +172,7 @@ int main(int argc, char *argv[])
         resultImg.setPixel(x, y, qRgb(c, c, c));
     }
     qDebug() << "correctness:" << float(correctCount) / float(testItemCount) * 100;
+    qDebug() << "saving to" << imageName + ".png";
     resultImg.save(imageName + ".png");
 
 //    QString filenameBase("gnuplot_%1_%2_%3_%4.dat");
