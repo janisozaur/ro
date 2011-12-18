@@ -2,12 +2,18 @@
 #include "NetworkLayer.h"
 #include "Connection.h"
 #include "../../common/TypeCommon.h"
+#include "../../common/CommonDefines.h"
 
 #include <cmath>
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
 #include <limits>
+#ifdef HAS_ELAPSED_TIMER
+    #include <QElapsedTimer>
+#else
+    #include <QTime>
+#endif
 
 #define TEACH_BIAS_MOMENTUM
 
@@ -169,7 +175,14 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
     for (int i = 0; i < train.size(); i++) {
         indicesBase.append(i);
     }
+#ifdef HAS_ELAPSED_TIMER
+    QElapsedTimer epochTimer;
+#else
+    QTime epochTimer;
+#endif
+    epochTimer.start();
     while (epochError > desiredError && epochNum < maxEpochs) {
+
         epochError = 0;
 
         QList<int> indices = indicesBase;
@@ -194,7 +207,8 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
         result << epochError;
 
         //lr *= 0.95;
-        out << "Epoch: " << epochNum << " error: " << epochError << endl;
+        const int msecs = epochTimer.restart();
+        out << "Epoch: " << epochNum << " error: " << epochError << msecs << "msecs" << endl;
         epochNum++;
     }
     return result;
