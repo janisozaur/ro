@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
         resultImg.setPixel(x, y, qRgb(c, c, c));
     }
     qDebug() << "correctness:" << float(correctCount) / float(testItemCount) * 100;
-    const QString imageFilename = imageName + ".png";
+    const QString imageFilename = imageName + "_" + args.last() + ".png";
     const bool saved = resultImg.save(imageFilename);
     if (saved) {
         qDebug() << "succesfully saved to" << imageFilename;
