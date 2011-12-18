@@ -22,6 +22,17 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    int threadCount = 1;
+    #ifdef _OPENMP
+    #pragma omp parallel
+    {
+    #pragma omp single
+        {
+            threadCount = omp_get_num_threads();
+        }
+    }
+    #endif
+    qDebug() << "using" << threadCount << "threads.";
 
     // set encoding
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -43,6 +54,11 @@ int main(int argc, char *argv[])
     }
     FeatureImporter testFeatures(&testFile);
     testFile.close();
+    qDebug() << "test data:";
+    qDebug() << "\tname:" << testFeatures.name();
+    qDebug() << "\titem count:" << testFeatures.itemCount();
+    qDebug() << "\tfeatures per item:" << testFeatures.featuresPerItem();
+    qDebug() << "\tfeatures overall:" << testFeatures.featuresPerItem() * testFeatures.itemCount();
 
     QSize size;
     {
@@ -67,17 +83,6 @@ int main(int argc, char *argv[])
     QImage resultImg(size, QImage::Format_RGB32);
     const QString imageName(args.at(4));
 
-    int threadCount = 1;
-#ifdef _OPENMP
-#pragma omp parallel
-    {
-#pragma omp single
-        {
-            threadCount = omp_get_num_threads();
-        }
-    }
-#endif
-    qDebug() << "using" << threadCount << "threads.";
     ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
     const QString classifierName = args.at(5);
@@ -89,6 +94,11 @@ int main(int argc, char *argv[])
         }
         FeatureImporter trainFeatures(&trainFile);
         trainFile.close();
+        qDebug() << "train data:";
+        qDebug() << "\tname:" << trainFeatures.name();
+        qDebug() << "\titem count:" << trainFeatures.itemCount();
+        qDebug() << "\tfeatures per item:" << trainFeatures.featuresPerItem();
+        qDebug() << "\tfeatures overall:" << trainFeatures.featuresPerItem() * trainFeatures.itemCount();
         bool ok = true;
         int k = 50;
         if (classifierArgs.size() >= 2) {
