@@ -2,6 +2,7 @@
 
 #include "extractors/FFT.h"
 #include "extractors/FFTSum.h"
+#include "extractors/FFTMoments.h"
 #include "extractors/LBP.h"
 #include "extractors/AutoCorrelation.h"
 
@@ -21,6 +22,8 @@ ExtractorInterface *ExtractorFactory::getExtractor(const QString &name,
         extractor = new LBP();
     } else if (name == "ac") {
         extractor = new AutoCorrelation();
+    } else if (name == "fouriermoments") {
+        extractor = new FFTMoments();
     } else {
         qCritical("no such extractor \"%s\"\n", name.toStdString().c_str());
     }
