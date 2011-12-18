@@ -193,6 +193,7 @@ int main(int argc, char *argv[])
                         testDataPtr[idx] = li;
                     }
                 }
+                out << endl;
             }
             const QVector<LabelledData> ppFeatures = extractor->postprocessTest(dataImage, labelImage);
             testData << ppFeatures;
