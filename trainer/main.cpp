@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
         return -1;
     }
     const QString inputFilename = args.at(1);
-    const QString outputFilename = args.at(2);
     bool ok;
     const nnreal maxEpochs = args.at(3).toInt(&ok);
     if (!ok) {
@@ -73,6 +72,10 @@ int main(int argc, char *argv[])
         qCritical() << "failed to parsee arg" << argIdx << ":" << args.at(argIdx) << "as float";
         return -1;
     }
+    const QString outputFilename = args.at(2) + QString::number(maxEpochs) + "_" +
+                                   QString::number(lr) + "_" +
+                                   QString::number(momentum) + "_" +
+                                   QString::number(desiredError) + ".ann";
     QFile f(inputFilename);
     if (!f.open(QIODevice::ReadOnly)) {
         qCritical() << "failed to open file" << f.fileName();
