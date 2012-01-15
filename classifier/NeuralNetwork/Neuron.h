@@ -21,7 +21,7 @@ public:
     void addConnection(const int &neuronIndex, const nnreal &weight);
     void addConnection(const int &neuronIndex);
     int connectionsCount() const;
-    Connection *connection(const int &connection) const;
+	Connection *connection(const int &_connection);
 
     void randomize();
     ActivationType activationType() const;
