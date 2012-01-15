@@ -227,27 +227,55 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
 
 QDataStream &operator<<(QDataStream &stream, const NeuralNetwork &nn)
 {
-    int size = sizeof(nnreal);
-    stream << size;
-    stream << nn.mLayers.size();
+	int size = sizeof(nnreal);
+	qDebug() << "writing size:" << size;
+	stream << size;
+	stream << nn.mLayers.size();
 
-    for (int i = 0; i < nn.mLayers.size(); i++) {
-        stream << nn.mLayers.at(i)->neuronsCount();
-        for (int j = 0; j < nn.mLayers.at(i)->neuronsCount(); j++) {
-            Neuron *neuron = nn.mLayers.at(i)->neuron(j);
-            stream << neuron->bias();
-            stream << int(neuron->activationType());
-            stream << neuron->connectionsCount();
+	for (int i = 0; i < nn.mLayers.size(); i++) {
+		stream << nn.mLayers.at(i)->neuronsCount();
+		for (int j = 0; j < nn.mLayers.at(i)->neuronsCount(); j++) {
+			Neuron *neuron = nn.mLayers.at(i)->neuron(j);
+			stream << neuron->bias();
+			stream << int(neuron->activationType());
+			stream << neuron->connectionsCount();
 
-            for (int z = 0; z < neuron->connectionsCount(); z++) {
-                Connection *conn = neuron->connection(z);
-                stream << conn->neuronIndex();
-                stream << conn->weight();
-                stream << conn->weightDelta();
-            }
-        }
-    }
-    return stream;
+			for (int z = 0; z < neuron->connectionsCount(); z++) {
+				Connection *conn = neuron->connection(z);
+				stream << conn->neuronIndex();
+				stream << conn->weight();
+				stream << conn->weightDelta();
+			}
+		}
+	}
+	return stream;
+}
+
+QTextStream &operator<<(QTextStream &stream, const NeuralNetwork &nn)
+{
+	int size = sizeof(nnreal);
+	stream << "size " << size << endl;
+	stream << "number of layers " << nn.mLayers.size() << endl;
+
+	for (int i = 0; i < nn.mLayers.size(); i++) {
+		stream << "layer " << i << " neuron count "
+			   << nn.mLayers.at(i)->neuronsCount() << endl;
+		for (int j = 0; j < nn.mLayers.at(i)->neuronsCount(); j++) {
+			Neuron *neuron = nn.mLayers.at(i)->neuron(j);
+			stream << "neuron " << j << endl;
+			stream << "bias " << neuron->bias() << " activation "
+				   << int(neuron->activationType()) << " connections_count "
+				   << neuron->connectionsCount() << endl;
+
+			for (int z = 0; z < neuron->connectionsCount(); z++) {
+				Connection *conn = neuron->connection(z);
+				stream << "conn " << z << " index " << conn->neuronIndex()
+					   << " weight " << conn->weight() << " wd "
+					   << conn->weightDelta() << endl;
+			}
+		}
+	}
+	return stream;
 }
 
 
