@@ -281,51 +281,51 @@ QTextStream &operator<<(QTextStream &stream, const NeuralNetwork &nn)
 
 QDataStream &operator>>(QDataStream &stream, NeuralNetwork &nn)
 {
-    int size;
-    stream >> size;
-    Q_ASSERT_X(size == sizeof(nnreal), __PRETTY_FUNCTION__, "Sorry, the network you're trying to load has invalid nnreal size");
+	int size;
+	stream >> size;
+	Q_ASSERT_X(size == sizeof(nnreal), __PRETTY_FUNCTION__, QString("Sorry, the network you're trying to load has invalid nnreal size: %1").arg(size).toStdString().c_str());
 
-    nn.mLayers.clear();
+	nn.mLayers.clear();
 
-    int layersNum;
-    stream >> layersNum;
+	int layersNum;
+	stream >> layersNum;
 
-    for (int i = 0; i < layersNum; i++) {
-        int neuronNum;
-        stream >> neuronNum;
+	for (int i = 0; i < layersNum; i++) {
+		int neuronNum;
+		stream >> neuronNum;
 
-        nn.addLayer(neuronNum);
+		nn.addLayer(neuronNum);
 
-        for (int j = 0; j < neuronNum; j++) {
-            Neuron *neuron = nn.mLayers.at(i)->neuron(j);
+		for (int j = 0; j < neuronNum; j++) {
+			Neuron *neuron = nn.mLayers.at(i)->neuron(j);
 
-            nnreal bias;
-            stream >> bias;
-            neuron->setBias(bias);
+			nnreal bias;
+			stream >> bias;
+			neuron->setBias(bias);
 
-            Neuron::ActivationType at;
-            int atInt;
-            stream >> atInt;
-            at = Neuron::ActivationType(atInt);
-            neuron->setActivationType(at);
+			Neuron::ActivationType at;
+			int atInt;
+			stream >> atInt;
+			at = Neuron::ActivationType(atInt);
+			neuron->setActivationType(at);
 
-            int connectionsNum;
-            stream >> connectionsNum;
-            for (int k = 0; k < connectionsNum; k++) {
-                int neuronIndex;
-                nnreal weight;
-                nnreal weightDelta;
+			int connectionsNum;
+			stream >> connectionsNum;
+			for (int k = 0; k < connectionsNum; k++) {
+				int neuronIndex;
+				nnreal weight;
+				nnreal weightDelta;
 
-                stream >> neuronIndex;
-                stream >> weight;
-                stream >> weightDelta;
+				stream >> neuronIndex;
+				stream >> weight;
+				stream >> weightDelta;
 
-                Connection *conn = neuron->connection(k);
-                conn->setNeuronIndex(neuronIndex);
-                conn->setWeightDelta(weightDelta);
-                conn->setWeight(weight);
-            }
-        }
-    }
-    return stream;
+				Connection *conn = neuron->connection(k);
+				conn->setNeuronIndex(neuronIndex);
+				conn->setWeightDelta(weightDelta);
+				conn->setWeight(weight);
+			}
+		}
+	}
+	return stream;
 }
