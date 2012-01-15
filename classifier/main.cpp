@@ -21,164 +21,166 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
-    int threadCount = 1;
-    #ifdef _OPENMP
-    #pragma omp parallel
-    {
-    #pragma omp single
-        {
-            threadCount = omp_get_num_threads();
-        }
-    }
-    #endif
-    qDebug() << "using" << threadCount << "threads.";
+	QCoreApplication a(argc, argv);
+	int threadCount = 1;
+	#ifdef _OPENMP
+	#pragma omp parallel
+	{
+	#pragma omp single
+		{
+			threadCount = omp_get_num_threads();
+		}
+	}
+	#endif
+	qDebug() << "using" << threadCount << "threads.";
 
-    // set encoding
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+	// set encoding
+	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-    QStringList args = a.arguments();
-    if (args.size() < 3) {
-        QStringList usage;
-        usage << args.at(0)
-              << "[train data]"
-              << "[test data]";
-        qFatal("Too few arguments. Usage:\n%s\n", usage.join(" ").toStdString().c_str());
-    }
+	QStringList args = a.arguments();
+	if (args.size() < 3) {
+		QStringList usage;
+		usage << args.at(0)
+			  << "[train data]"
+			  << "[test data]";
+		qFatal("Too few arguments. Usage:\n%s\n", usage.join(" ").toStdString().c_str());
+	}
 
-    QFile testFile(args.at(1));
-    if (!testFile.open(QIODevice::ReadOnly)) {
-        qFatal("Failed to open test file %s.\n", testFile.fileName().toStdString().c_str());
-    }
-    FeatureImporter testFeatures(&testFile);
-    testFile.close();
-    qDebug() << "test data:";
-    qDebug() << "\tname:" << testFeatures.name();
-    qDebug() << "\titem count:" << testFeatures.itemCount();
-    qDebug() << "\tfeatures per item:" << testFeatures.featuresPerItem();
-    qDebug() << "\tfeatures overall:" << testFeatures.featuresPerItem() * testFeatures.itemCount();
+	QFile testFile(args.at(1));
+	if (!testFile.open(QIODevice::ReadOnly)) {
+		qFatal("Failed to open test file %s.\n", testFile.fileName().toStdString().c_str());
+	}
+	FeatureImporter testFeatures(&testFile);
+	testFile.close();
+	qDebug() << "test data:";
+	qDebug() << "\tname:" << testFeatures.name();
+	qDebug() << "\titem count:" << testFeatures.itemCount();
+	qDebug() << "\tfeatures per item:" << testFeatures.featuresPerItem();
+	qDebug() << "\tfeatures overall:" << testFeatures.featuresPerItem() * testFeatures.itemCount();
 
-    QSize size;
-    {
-        bool ok;
-        const int width = args.at(2).toInt(&ok);
-        if (!ok) {
-            const int argNum = 2;
-            qCritical() << "failed to parse arg" << argNum << ":"
-                        << args.at(argNum) << "as int";
-            return -1;
-        }
-        const int height = args.at(3).toInt(&ok);
-        if (!ok) {
-            const int argNum = 3;
-            qCritical() << "failed to parse arg" << argNum << ":"
-                        << args.at(argNum) << "as int";
-            return -1;
-        }
-        size = QSize(width, height);
-    }
+	QSize size;
+	{
+		bool ok;
+		const int width = args.at(2).toInt(&ok);
+		if (!ok) {
+			const int argNum = 2;
+			qCritical() << "failed to parse arg" << argNum << ":"
+						<< args.at(argNum) << "as int";
+			return -1;
+		}
+		const int height = args.at(3).toInt(&ok);
+		if (!ok) {
+			const int argNum = 3;
+			qCritical() << "failed to parse arg" << argNum << ":"
+						<< args.at(argNum) << "as int";
+			return -1;
+		}
+		size = QSize(width, height);
+	}
 
-    QImage resultImg(size, QImage::Format_RGB32);
-    const QString imageName(args.at(4));
+	QImage resultImg(size, QImage::Format_RGB32);
+	const QString imageName(args.at(4));
 
-    ClassifierInterface **ci = new ClassifierInterface *[threadCount];
+	ClassifierInterface **ci = new ClassifierInterface *[threadCount];
 
-    const QString classifierName = args.at(5);
-    const QStringList classifierArgs = args.mid(6);
-    if (classifierName == "knn") {
-        QFile trainFile(classifierArgs.at(0));
-        if (!trainFile.open(QIODevice::ReadOnly)) {
-            qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
-        }
-        FeatureImporter trainFeatures(&trainFile);
-        trainFile.close();
-        qDebug() << "train data:";
-        qDebug() << "\tname:" << trainFeatures.name();
-        qDebug() << "\titem count:" << trainFeatures.itemCount();
-        qDebug() << "\tfeatures per item:" << trainFeatures.featuresPerItem();
-        qDebug() << "\tfeatures overall:" << trainFeatures.featuresPerItem() * trainFeatures.itemCount();
-        bool ok = true;
-        int k = 50;
-        if (classifierArgs.size() >= 2) {
-            k = qMax(0, classifierArgs.at(1).toInt(&ok));
-            qDebug() << "k =" << k;
-        } else {
-            ok = false;
-        }
-        if (!ok) {
-            qDebug() << "no k given, assuming k = 50";
-            k = 50;
-        }
-        qDebug() << "initial k:" << k;
-        for (int i = 0; i < threadCount; i++) {
-            ci[i] = new KnnClassifier(k, trainFeatures);
-        }
-    } else if (classifierName == "ann") {
-        QFile networkFile(classifierArgs.at(0));
-        if (!networkFile.open(QIODevice::ReadOnly)) {
-            qFatal("Failed to open network file %s.\n", networkFile.fileName().toStdString().c_str());
-        }
-        QByteArray qba = networkFile.readAll();
-        networkFile.close();
-        for (int i = 0; i < threadCount; i++) {
-            QBuffer buf(&qba);
-            buf.open(QIODevice::ReadOnly);
-            NeuralNetwork *nn = new NeuralNetwork();
-            QDataStream ds(&buf);
-            ds >> *nn;
-            buf.close();
-            ci[i] = nn;
-        }
-    } else {
-        qCritical() << "unrecognised classifier:" << classifierName;
-        return -1;
-    }
+	const QString classifierName = args.at(5);
+	const QStringList classifierArgs = args.mid(6);
+	if (classifierName == "knn") {
+		QFile trainFile(classifierArgs.at(0));
+		if (!trainFile.open(QIODevice::ReadOnly)) {
+			qFatal("Failed to open train file %s.\n", trainFile.fileName().toStdString().c_str());
+		}
+		FeatureImporter trainFeatures(&trainFile);
+		trainFile.close();
+		qDebug() << "train data:";
+		qDebug() << "\tname:" << trainFeatures.name();
+		qDebug() << "\titem count:" << trainFeatures.itemCount();
+		qDebug() << "\tfeatures per item:" << trainFeatures.featuresPerItem();
+		qDebug() << "\tfeatures overall:" << trainFeatures.featuresPerItem() * trainFeatures.itemCount();
+		bool ok = true;
+		int k = 50;
+		if (classifierArgs.size() >= 2) {
+			k = qMax(0, classifierArgs.at(1).toInt(&ok));
+			qDebug() << "k =" << k;
+		} else {
+			ok = false;
+		}
+		if (!ok) {
+			qDebug() << "no k given, assuming k = 50";
+			k = 50;
+		}
+		qDebug() << "initial k:" << k;
+		for (int i = 0; i < threadCount; i++) {
+			ci[i] = new KnnClassifier(k, trainFeatures);
+		}
+	} else if (classifierName == "ann") {
+		QFile networkFile(classifierArgs.at(0));
+		if (!networkFile.open(QIODevice::ReadOnly)) {
+			qFatal("Failed to open network file %s.\n", networkFile.fileName().toStdString().c_str());
+		}
+		QByteArray qba = networkFile.readAll();
+		networkFile.close();
+		for (int i = 0; i < threadCount; i++) {
+			QBuffer buf(&qba);
+			buf.open(QIODevice::ReadOnly);
+			NeuralNetwork *nn = new NeuralNetwork();
+			QDataStream ds(&buf);
+			ds >> *nn;
+			buf.close();
+			ci[i] = nn;
+		}
+	} else {
+		qCritical() << "unrecognised classifier:" << classifierName;
+		return -1;
+	}
 
-    const int testItemCount = testFeatures.itemCount();
-    QVector<quint8> classes(testItemCount);
-    quint8 *classesPtr = classes.data();
-    qDebug() << "starting classification of" << testItemCount << "items";
+	const int testItemCount = testFeatures.itemCount();
+	QVector<quint8> classes(testItemCount);
+	quint8 *classesPtr = classes.data();
+	qDebug() << "starting classification of" << testItemCount << "items";
 #ifdef HAS_ELAPSED_TIMER
-    QElapsedTimer timer;
+	QElapsedTimer timer;
 #else
-    QTime timer;
+	QTime timer;
 #endif
-    timer.start();
+	timer.start();
 #pragma omp parallel
-    {
-        const int threadNum = omp_get_thread_num();
-        #pragma omp for
-        for (int i = 0; i < testItemCount; i++) {
-            classesPtr[i] = ci[threadNum]->classify(testFeatures.featuresForItem(i));
-        }
-    }
-    int msecs = timer.elapsed();
-    for (int i = 0; i < threadCount; i++) {
-        delete ci[i];
-    }
-    delete [] ci;
-    qDebug() << "calculations took" << msecs << "msecs";
+	{
+		const int threadNum = omp_get_thread_num();
+		#pragma omp for
+		for (int i = 0; i < testItemCount; i++) {
+			classesPtr[i] = ci[threadNum]->classify(testFeatures.featuresForItem(i));
+		}
+	}
+	int msecs = timer.elapsed();
+	for (int i = 0; i < threadCount; i++) {
+		delete ci[i];
+	}
+	delete [] ci;
+	qDebug() << "calculations took" << msecs << "msecs";
 
-    quint32 correctCount = 0;
-    for (quint32 i = 0; i < quint32(classes.size()); i++) {
-        const int c = classes.at(i);
-        if (c == testFeatures.classIdForItem(i)) {
-            correctCount++;
-        }
-        const int x = i % size.width();
-        const int y = i / size.width();
-        resultImg.setPixel(x, y, qRgb(c, c, c));
-    }
-    qDebug() << "correctness:" << float(correctCount) / float(testItemCount) * 100;
-    const QString imageFilename = imageName + "_" + args.last() + ".png";
-    const bool saved = resultImg.save(imageFilename);
-    if (saved) {
-        qDebug() << "succesfully saved to" << imageFilename;
-    } else {
-        qDebug() << "saving to" << imageFilename << "failed!";
-    }
+	quint32 correctCount = 0;
+	for (quint32 i = 0; i < quint32(classes.size()); i++) {
+		const int c = classes.at(i);
+		const int ec = testFeatures.classIdForItem(i);
+		//qDebug() << "is" << c << "should be" << ec;
+		if (c == ec) {
+			correctCount++;
+		}
+		const int x = i % size.width();
+		const int y = i / size.width();
+		resultImg.setPixel(x, y, qRgb(c, c, c));
+	}
+	qDebug() << "correctness:" << float(correctCount) / float(testItemCount) * 100;
+	const QString imageFilename = imageName + "_" + args.last() + ".png";
+	const bool saved = resultImg.save(imageFilename);
+	if (saved) {
+		qDebug() << "succesfully saved to" << imageFilename;
+	} else {
+		qDebug() << "saving to" << imageFilename << "failed!";
+	}
 
 //    QString filenameBase("gnuplot_%1_%2_%3_%4.dat");
 //    QString hostname(QHostInfo::localHostName());
@@ -271,5 +273,5 @@ int main(int argc, char *argv[])
 //    gnuplotFile.close();
 //    msecs = timer.elapsed();
 //    qDebug() << "everything took" << msecs << "msecs";
-    return 0;
+	return 0;
 }
