@@ -9,27 +9,27 @@
 
 #include <QDebug>
 
-QVector<nnreal> classToVector(const quint8 &classId, const int &initial)
+QVector<nnreal> classToVector(const quint8 &classId, const nnreal &initial)
 {
-    QVector<nnreal> result(4, initial);
-    int idx;
-    switch (classId) {
-        case 32:
-            idx = 0;
-            break;
-        case 96:
-            idx = 1;
-            break;
-        case 160:
-            idx = 2;
-            break;
-        default:
-        case 224:
-            idx = 3;
-            break;
-    }
-    result[idx] = 1;
-    return result;
+	QVector<nnreal> result(4, initial);
+	int idx;
+	switch (classId) {
+		case 32:
+			idx = 0;
+			break;
+		case 96:
+			idx = 1;
+			break;
+		case 160:
+			idx = 2;
+			break;
+		default:
+		case 224:
+			idx = 3;
+			break;
+	}
+	result[idx] = 0.75;
+	return result;
 }
 
 int main(int argc, char *argv[])
