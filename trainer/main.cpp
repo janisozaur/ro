@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-	qsrand(QDateTime::currentDateTime().toTime_t());
+	qsrand(QDateTime::currentDateTime().currentMSecsSinceEpoch());
 	const QStringList args = a.arguments();
 
 	if (args.size() < 4) {
@@ -73,6 +73,14 @@ int main(int argc, char *argv[])
 		qCritical() << "failed to parsee arg" << argIdx << ":" << args.at(argIdx) << "as float";
 		return -1;
 	}
+	const quint32 itemLimit = (args.size() > 7 ? args.at(7).toInt(&ok) : 0);
+	if (!ok) {
+		const int argIdx = 7;
+		qWarning() << "failed to parse arg" << argIdx << ":" << args.at(argIdx) << "as int";
+	}
+	if (itemLimit == 0) {
+		qWarning() << "using whole item set";
+	}
 	const QString outputFilename = args.at(2) + QString::number(maxEpochs) + "_" +
 								   QString::number(lr) + "_" +
 								   QString::number(momentum) + "_" +
@@ -100,9 +108,15 @@ int main(int argc, char *argv[])
 	input.reserve(td.itemCount());
 	output.reserve(td.itemCount());
 #endif
-	quint32 itemCount = td.itemCount();
+	quint32 itemCount = itemLimit == 0 ? td.itemCount() : qMin(td.itemCount(), itemLimit);
 	qDebug() << "training on" << itemCount << "elements";
-	for (quint32 i = 0; i < itemCount; i++) {
+	QList<quint32> items;
+	items.reserve(itemCount);
+	for (quint32 i = 0; i < td.itemCount(); i++) {
+		items << i;
+	}
+	for (quint32 cnt = 0; cnt < itemCount; cnt++) {
+		const quint32 i = items.takeAt(qrand() % items.size());
 		const QVector<nnreal> inData = td.featuresForItem(i);
 		input.append(inData);
 		const QVector<nnreal> outData = classToVector(td.classIdForItem(i), 0.25);
