@@ -92,6 +92,47 @@ int main(int argc, char *argv[])
 	}
 	FeatureImporter td(&f);
 	f.close();
+
+	/*
+	const QString testFilename = args.last();
+	QFile testf(testFilename);
+	if (!testf.open(QIODevice::ReadOnly)) {
+		qCritical() << "failed to open file" << testf.fileName();
+		return -2;
+	}
+	FeatureImporter testd(&testf);
+	testf.close();
+	QFile trainFile("train.txt");
+	trainFile.open(QIODevice::WriteOnly);
+	QTextStream trainStream(&trainFile);
+	for (quint32 i = 0; i < td.itemCount(); i++) {
+		trainStream << td.classIdForItem(i) << " ";
+		QStringList l;
+		l.reserve(td.featuresPerItem());
+		for (quint32 j = 0; j < td.featuresPerItem(); j++) {
+			QString num(QString::number(td.featuresForItem(i).at(j)));
+			l.append(num);
+		}
+		trainStream << l.join(" ") << endl;
+	}
+	trainFile.close();
+
+	QFile testFile("test.txt");
+	testFile.open(QIODevice::WriteOnly);
+	QTextStream testStream(&testFile);
+	for (quint32 i = 0; i < testd.itemCount(); i++) {
+		testStream << testd.classIdForItem(i) << " ";
+		QStringList l;
+		l.reserve(testd.featuresPerItem());
+		for (quint32 j = 0; j < testd.featuresPerItem(); j++) {
+			QString num(QString::number(testd.featuresForItem(i).at(j)));
+			l.append(num);
+		}
+		testStream << l.join(" ") << endl;
+	}
+	testFile.close();
+	*/
+
 	qDebug() << "teaching ann from extractor" << td.name()
 			 << "it was run with params" << td.args().join(" ") << ", has"
 			 << td.itemCount() << "items, each of which has"
