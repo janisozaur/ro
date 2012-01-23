@@ -237,7 +237,7 @@ QVector<float> NeuralNetwork::train(const QVector<QVector<nnreal> > &train,
 		}
 		result << epochError;
 
-		lr *= 0.999;
+		//lr *= 0.999;
 		const int msecs = epochTimer.restart();
 		out << "Epoch: " << epochNum << " error: " << epochError << ", "
 			<< msecs << "msecs, saved: " << saved << endl;
